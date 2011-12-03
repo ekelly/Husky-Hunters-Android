@@ -9,6 +9,7 @@ import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,27 +19,53 @@ import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
 public class HuntersActivity extends ListActivity {
+	private static final String TAG = "HuntersActivity";
+	
+	private static final String GROUP_HASH = "69577289";
 	
 	ClueArray clues;
-	ArrayList<? extends Map<String, ?>> cluemap;
-	ClueAdapter clueAdapter;
+	ArrayList<? extends Map<String, ?>> cluemap;	
+	CluesData mCluesData;
+	
+	
+	class DownloadCluesTask extends AsyncTask<CluesData, Integer, CluesData>{
+
+		@Override
+		protected CluesData doInBackground(CluesData... params) {
+	      CluesData clue = params[0];
+		  clue.load(GROUP_HASH);
+		  return clue;
+		}
+		
+	     protected void onPostExecute(CluesData result) {
+	    	 mCluesData = result;
+	         setListAdapter(mCluesData.getAdapter());
+	     } 
+	}
+
+	
 	
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
+        mCluesData = CluesData.getInstance(getApplicationContext());
+        if ( !mCluesData.isLoaded() ) {
+        	new DownloadCluesTask().execute(mCluesData);
+        }
+        
         //setContentView(R.layout.main);
         
         // Popup "Loading..." indicator?
         
-        /*
-        JSONFetcher fetcher = new JSONFetcher();
-        clues = fetcher.fetch();
-        fetcher.finish();
-        */
+        
+        //JSONFetcher fetcher = new JSONFetcher("69577289");
+        //clues = fetcher.fetch();
+        
         
         // Remove loading indicator?
-        
+        /*
         clues = new ClueArray();
         clues.add(new Clue(1, "This is the Answer", "This is the Original Clue", 
         		70, "International Village", 3, false));
@@ -48,34 +75,13 @@ public class HuntersActivity extends ListActivity {
         clues.add(new Clue(3, "This is the Answer for clue 3", 
         		"This is the Original Clue", 100, "West Village H", 3, 
         		false));
-        
-        cluemap = clues.mappify();
-        clueAdapter = new ClueAdapter(this.getApplicationContext(), 
-        		cluemap, R.layout.clue_item, 
-        		new String[] { "clueNum", "answer", "points" }, 
-        		new int[] { R.id.cluenum, R.id.answer, R.id.points } ); 
-        setListAdapter(clueAdapter);
-    }
-    
-    private static class ClueAdapter extends SimpleAdapter {
-    	
-		public ClueAdapter(Context context,
-				List<? extends Map<String, ?>> data, int resource,
-				String[] from, int[] to) {
-			super(context, data, resource, from, to);
-		}
-		
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-		  LinearLayout view = (LinearLayout) super.getView(position, convertView, parent);
-		  @SuppressWarnings("unchecked")
-		HashMap<String, String> c = (HashMap<String, String>) getItem(position);
-		  if(Boolean.parseBoolean(c.get("solved"))) {
-			  view.setBackgroundColor(Color.GREEN);
-		  }
-		  return view;
-		}
-    	
+        */
+        //cluemap = clues.mappify();
+        //clueAdapter = new ClueAdapter(this.getApplicationContext(), 
+        //		cluemap, R.layout.clue_item, 
+        //		new String[] { "clueNum", "answer", "points" }, 
+        //		new int[] { R.id.cluenum, R.id.answer, R.id.points } ); 
+        //setListAdapter(clueAdapter);
     }
     
     @Override
@@ -85,7 +91,7 @@ public class HuntersActivity extends ListActivity {
 		Intent intent = new Intent(this, ClueDetail.class);
 		Bundle bundle = new Bundle();
 		bundle.putInt("cluenum", Integer.parseInt(item.get("clueNum")));
-		bundle.putParcelableArrayList("clues", clues);
+		bundle.putParcelableArrayList("clues", mCluesData.getArray());
 		intent.putExtras(bundle);
 		startActivityForResult(intent, R.integer.clue_result);
 	}
@@ -100,13 +106,11 @@ public class HuntersActivity extends ListActivity {
 		    		if(picTaken) {
 		    			// Sets clue to boolean and returns itself
 		    			clues.get(index).setSolved(picTaken);
-		    			// Refresh the list view
-		    			cluemap = clues.mappify();
-		    			clueAdapter = new ClueAdapter(this.getApplicationContext(), 
-		    	        		cluemap, R.layout.clue_item, 
-		    	        		new String[] { "clueNum", "answer", "points" }, 
-		    	        		new int[] { R.id.cluenum, R.id.answer, R.id.points } ); 
-		    	        setListAdapter(clueAdapter);
+		    			
+		    			// Reset the list adapter
+		    			CluesData.getInstance(getApplicationContext());
+		    	        setListAdapter(CluesData.getInstance(this
+		    	        		.getApplicationContext()).getAdapter());
 		    			
 		    			// TODO Send data to server
 		    			
@@ -123,19 +127,17 @@ public class HuntersActivity extends ListActivity {
 		    		Integer cluenum = res.getInt("cluenum");
 		    		if(solved) {
 		    			// Sets clue to boolean and returns itself
+		    			ClueArray clues = (ClueArray) mCluesData.getArray();
 		    			for(int i = 0; i < clues.size(); i++) {
 		    				if(clues.get(i).clueNum() == cluenum) {
 		    					clues.get(i).setSolved(solved);
+		    					mCluesData.setData(clues);
 		    					break;
 		    				}
 		    			}
-		    			// Refresh the list view
-		    			cluemap = clues.mappify();
-		    			clueAdapter = new ClueAdapter(this.getApplicationContext(), 
-		    	        		cluemap, R.layout.clue_item, 
-		    	        		new String[] { "clueNum", "answer", "points" }, 
-		    	        		new int[] { R.id.cluenum, R.id.answer, R.id.points } ); 
-		    	        setListAdapter(clueAdapter);
+		    			// Reset the list
+		    	        setListAdapter(CluesData.getInstance(this
+		    	        		.getApplicationContext()).getAdapter());
 		    			
 		    			// TODO Send data to server
 		    			

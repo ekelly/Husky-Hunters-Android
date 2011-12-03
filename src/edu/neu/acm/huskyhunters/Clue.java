@@ -13,18 +13,14 @@ public class Clue implements Parcelable {
 	private String clue;
 	private Integer points;
 	private String location;
-	private Integer numTeamMembers;
 	private Boolean solved;
-	//private Double[] latlng;
+	private double[] latlng;
 	
 	public Integer clueNum() {
 		return clueNum;
 	}
 	public Integer points() {
 		return points;
-	}
-	public Integer numTeamMembers() {
-		return numTeamMembers;
 	}
 	public String answer() {
 		return answer;
@@ -42,16 +38,19 @@ public class Clue implements Parcelable {
 		this.solved = isSolved;
 		return isSolved;
 	}
+	public double[] latlng() {
+		return latlng;
+	}
 	
 	public Clue(int clueNum, String answer, String clue, int points, 
-			String location, int numTeamMembers, boolean solved) {
+			String location, boolean solved, double[] ll) {
 		this.clueNum = clueNum;
 		this.answer = answer;
 		this.clue = clue;
 		this.points = points;
 		this.location = location;
-		this.numTeamMembers = numTeamMembers;
 		this.solved = solved;
+		this.latlng = ll;
 	}
 	
 	Clue(Parcel in) {
@@ -60,7 +59,6 @@ public class Clue implements Parcelable {
 		clue = in.readString();
 		points = in.readInt();
 		location = in.readString();
-		numTeamMembers = in.readInt();
 		
 		byte convBool = in.readByte();
 		if(convBool == 0) {
@@ -70,6 +68,8 @@ public class Clue implements Parcelable {
 		} else {
 			Log.i("Clues Unpack", "Boolean solved error");
 		}
+		
+		double[] latlng = { in.readDouble(), in.readDouble() };
 	}
 	
 	public HashMap<String, String> toMap() {
@@ -79,7 +79,8 @@ public class Clue implements Parcelable {
 		map.put("clue", clue);
 		map.put("points", points.toString());
 		map.put("location", location);
-		map.put("numTeamMembers", numTeamMembers.toString());
+		map.put("latlngx", ((Double) latlng[0]).toString());
+		map.put("latlngy", ((Double) latlng[1]).toString());
 		map.put("solved", solved.toString());
 		return map;
 	}
@@ -94,8 +95,6 @@ public class Clue implements Parcelable {
 		out.writeString(clue());
 		out.writeInt(points());
 		out.writeString(location());
-		out.writeInt(numTeamMembers());
-		//out.writeArray(latlng);
 		
 		// Convert the boolean to a byte
 		byte convBool = -1;
@@ -105,6 +104,9 @@ public class Clue implements Parcelable {
 		    convBool = 0;
 		}
 		out.writeByte(convBool);
+		
+		out.writeDouble(latlng[0]);
+		out.writeDouble(latlng[1]);
 	}
 	
 	public static final Parcelable.Creator<Clue> CREATOR
