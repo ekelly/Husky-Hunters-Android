@@ -4,32 +4,27 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
-public class ClueArray extends ArrayList<Clue> implements Parcelable {
+public class ClueArray extends ArrayList<Clue> /* implements Parcelable */ {
 	
-	/**
-	 *   Generated serial id
-	 */
+	// Generated serial id
 	private static final long serialVersionUID = 5431915875340174154L;
 
+	public ArrayList<? extends Map<String, ?>> mappify() {
+		ArrayList<HashMap<String, String>> list = new ArrayList<HashMap<String, String>>();
+		for(int i = 0; i < this.size(); i++) {
+			list.add(this.get(i).toMap());
+		}
+		return list;
+	}
+	
+/*
+	
 	@Override
 	public int describeContents() {
 		return 0;
 	}
 
-    public static final Parcelable.Creator<Clue> CREATOR
-            = new Parcelable.Creator<Clue>() {
-        public Clue createFromParcel(Parcel in) {
-            return new Clue(in);
-        }
-
-        public Clue[] newArray(int size) {
-            return new Clue[size];
-        }
-    };
-
+/*
 	@Override
 	public void writeToParcel(Parcel out, int arg1) {
 		
@@ -37,7 +32,7 @@ public class ClueArray extends ArrayList<Clue> implements Parcelable {
 		out.writeInt(size);
 		for (int i = 0; i < size; i++) {
             Clue c = this.get(i);
-            
+            //c.writeToParcel(out, 0);
             out.writeInt(c.clueNum());
     		out.writeString(c.answer());
     		out.writeString(c.originalClue());
@@ -55,13 +50,6 @@ public class ClueArray extends ArrayList<Clue> implements Parcelable {
     		out.writeByte(convBool);
 		}
 	}
-	
-	public ArrayList<? extends Map<String, ?>> mappify() {
-		ArrayList<HashMap<String, String>> list = new ArrayList<HashMap<String, String>>();
-		for(int i = 0; i < this.size(); i++) {
-			list.add(this.get(i).toMap());
-		}
-		return list;
-	}
+*/	
 
 }

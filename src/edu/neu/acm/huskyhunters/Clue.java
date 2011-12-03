@@ -3,13 +3,14 @@ package edu.neu.acm.huskyhunters;
 import java.util.HashMap;
 
 import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 
-public class Clue {
+public class Clue implements Parcelable {
 
 	private Integer clueNum;
 	private String answer;
-	private String originalClue;
+	private String clue;
 	private Integer points;
 	private String location;
 	private Integer numTeamMembers;
@@ -27,8 +28,8 @@ public class Clue {
 	public String answer() {
 		return answer;
 	}
-	public String originalClue() {
-		return originalClue;
+	public String clue() {
+		return clue;
 	}
 	public String location() {
 		return location;
@@ -37,11 +38,11 @@ public class Clue {
 		return solved;
 	}
 	
-	public Clue(int clueNum, String answer, String originalClue, int points, 
+	public Clue(int clueNum, String answer, String clue, int points, 
 			String location, int numTeamMembers, boolean solved) {
 		this.clueNum = clueNum;
 		this.answer = answer;
-		this.originalClue = originalClue;
+		this.clue = clue;
 		this.points = points;
 		this.location = location;
 		this.numTeamMembers = numTeamMembers;
@@ -51,7 +52,7 @@ public class Clue {
 	Clue(Parcel in) {
 		clueNum = in.readInt();
 		answer = in.readString();
-		originalClue = in.readString();
+		clue = in.readString();
 		points = in.readInt();
 		location = in.readString();
 		numTeamMembers = in.readInt();
@@ -70,12 +71,45 @@ public class Clue {
 		HashMap<String, String> map = new HashMap<String, String>();
 		map.put("clueNum", clueNum.toString());
 		map.put("answer", answer);
-		map.put("originalClue", originalClue);
+		map.put("clue", clue);
 		map.put("points", points.toString());
 		map.put("location", location);
 		map.put("numTeamMembers", numTeamMembers.toString());
 		map.put("solved", solved.toString());
 		return map;
 	}
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+	@Override
+	public void writeToParcel(Parcel out, int flags) {
+		out.writeInt(clueNum());
+		out.writeString(answer());
+		out.writeString(clue());
+		out.writeInt(points());
+		out.writeString(location());
+		out.writeInt(numTeamMembers());
+		
+		// Convert the boolean to a byte
+		byte convBool = -1;
+		if (solved()) {
+		    convBool = 1;
+		} else {
+		    convBool = 0;
+		}
+		out.writeByte(convBool);
+	}
+	
+	public static final Parcelable.Creator<Clue> CREATOR
+	    = new Parcelable.Creator<Clue>() {
+		public Clue createFromParcel(Parcel in) {
+		    return new Clue(in);
+		}
+		
+		public Clue[] newArray(int size) {
+		    return new Clue[size];
+		}
+	};
 	
 }

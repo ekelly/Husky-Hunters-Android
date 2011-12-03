@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:id="@+id/detail_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:gravity="right" >
+
+        <TextView
+            android:id="@+id/detail_cluenum"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:paddingTop="6dip"
+            android:paddingBottom="6dip"
+            android:paddingRight="6dip"
+            android:paddingLeft="10dip"
+            android:textColor="@color/black"
+            android:gravity="left"
+            android:textSize="24sp" />
+
+        <TextView
+            android:id="@+id/detail_points"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:paddingTop="6dip"
+            android:paddingBottom="6dip"
+            android:paddingLeft="6dip"
+            android:paddingRight="10dip"
+            android:textColor="@color/black"
+            android:gravity="right"
+            android:textSize="24sp" />
+
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/detail_cluelabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dip"
+        android:layout_marginTop="15dip"
+        android:textStyle="bold"
+        android:textColor="@color/white"
+        android:text="Clue:" />
+        
+    <TextView
+        android:id="@+id/detail_clue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dip" />
+        
+    <TextView
+        android:id="@+id/detail_answerlabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dip"
+        android:paddingTop="5dip"
+        android:textStyle="bold"
+        android:textColor="@color/white"
+        android:text="Answer:" />
+    
+    <TextView
+        android:id="@+id/detail_answer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dip" />
+
+    <LinearLayout
+        android:id="@+id/buttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dip"
+        android:gravity="left" >
+
+        <Button
+            android:id="@+id/directions"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginLeft="6dp"
+            android:layout_marginRight="3dp"
+            android:onClick="getDirections"
+            android:text="Directions" />
+
+        <Button
+            android:id="@+id/photo"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+			android:layout_weight="1"
+            android:layout_marginLeft="3dp"
+            android:layout_marginRight="6dp"
+            android:onClick="takePhoto"
+            android:text="Take Photo" />
+        
+    </LinearLayout>
+
+</LinearLayout>
