@@ -37,7 +37,13 @@ public class JSONParser {
 				String location = obj.getString("location");
 				int numTeamMembers = obj.getInt("numTeamMembers");
 				boolean solved = obj.getBoolean("solved");
-				
+				//Double[] latlng = { 0.0 , 0.0 };
+				/*
+				JSONArray ll = obj.getJSONArray("latlng");
+				for(int j = 0; j < ll.length(); j++) {
+					latlng[j] = ll.getDouble(j);
+				}
+				*/
 				new Clue(clueNum, answer, originalClue, points, 
 						location, numTeamMembers, solved);
 				Log.i(JSONFetcher.class.getName(), obj.getString("originalClue"));

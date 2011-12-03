@@ -15,6 +15,7 @@ public class Clue implements Parcelable {
 	private String location;
 	private Integer numTeamMembers;
 	private Boolean solved;
+	//private Double[] latlng;
 	
 	public Integer clueNum() {
 		return clueNum;
@@ -36,6 +37,10 @@ public class Clue implements Parcelable {
 	}
 	public Boolean solved() {
 		return solved;
+	}
+	public Boolean setSolved(Boolean isSolved) {
+		this.solved = isSolved;
+		return isSolved;
 	}
 	
 	public Clue(int clueNum, String answer, String clue, int points, 
@@ -90,6 +95,7 @@ public class Clue implements Parcelable {
 		out.writeInt(points());
 		out.writeString(location());
 		out.writeInt(numTeamMembers());
+		//out.writeArray(latlng);
 		
 		// Convert the boolean to a byte
 		byte convBool = -1;

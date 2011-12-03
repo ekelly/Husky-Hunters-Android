@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="camera_result" type="integer" format="integer">1</item>
+	<item name="clue_result" type="integer" format="integer">2</item>
+    
+</resources>
