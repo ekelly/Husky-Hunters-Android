@@ -1,6 +1,8 @@
 package edu.neu.acm.huskyhunters;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -36,22 +38,30 @@ public class ClueArray extends ArrayList<Clue> implements Parcelable {
 		for (int i = 0; i < size; i++) {
             Clue c = this.get(i);
             
-            out.writeInt(c.clueNum);
-    		out.writeString(c.answer);
-    		out.writeString(c.originalClue);
-    		out.writeInt(c.points);
-    		out.writeString(c.location);
-    		out.writeInt(c.numTeamMembers);
+            out.writeInt(c.clueNum());
+    		out.writeString(c.answer());
+    		out.writeString(c.originalClue());
+    		out.writeInt(c.points());
+    		out.writeString(c.location());
+    		out.writeInt(c.numTeamMembers());
     		
     		// Convert the boolean to a byte
     		byte convBool = -1;
-    		if (c.solved) {
+    		if (c.solved()) {
     		    convBool = 1;
     		} else {
     		    convBool = 0;
     		}
     		out.writeByte(convBool);
 		}
+	}
+	
+	public ArrayList<? extends Map<String, ?>> mappify() {
+		ArrayList<HashMap<String, String>> list = new ArrayList<HashMap<String, String>>();
+		for(int i = 0; i < this.size(); i++) {
+			list.add(this.get(i).toMap());
+		}
+		return list;
 	}
 
 }
