@@ -14,7 +14,8 @@ public class Clue implements Parcelable {
 	private Integer points;
 	private String location;
 	private Boolean solved;
-	private double[] latlng;
+	//private double[] latlng;
+	private String photo;
 	
 	public Integer clueNum() {
 		return clueNum;
@@ -38,19 +39,25 @@ public class Clue implements Parcelable {
 		this.solved = isSolved;
 		return isSolved;
 	}
+	/*
 	public double[] latlng() {
 		return latlng;
 	}
+	*/
+	public String photo() {
+		return photo;
+	}
 	
 	public Clue(int clueNum, String answer, String clue, int points, 
-			String location, boolean solved, double[] ll) {
+			String location, boolean solved, /* double[] ll, */ String photo) {
 		this.clueNum = clueNum;
 		this.answer = answer;
 		this.clue = clue;
 		this.points = points;
 		this.location = location;
 		this.solved = solved;
-		this.latlng = ll;
+		//this.latlng = ll;
+		this.photo = photo;
 	}
 	
 	Clue(Parcel in) {
@@ -69,7 +76,10 @@ public class Clue implements Parcelable {
 			Log.i("Clues Unpack", "Boolean solved error");
 		}
 		
-		double[] latlng = { in.readDouble(), in.readDouble() };
+		//latlng[0] = in.readDouble();
+		//latlng[1] = in.readDouble();
+		
+		photo = in.readString();
 	}
 	
 	public HashMap<String, String> toMap() {
@@ -79,8 +89,8 @@ public class Clue implements Parcelable {
 		map.put("clue", clue);
 		map.put("points", points.toString());
 		map.put("location", location);
-		map.put("latlngx", ((Double) latlng[0]).toString());
-		map.put("latlngy", ((Double) latlng[1]).toString());
+		//map.put("latlngx", ((Double) latlng[0]).toString());
+		//map.put("latlngy", ((Double) latlng[1]).toString());
 		map.put("solved", solved.toString());
 		return map;
 	}
@@ -105,8 +115,10 @@ public class Clue implements Parcelable {
 		}
 		out.writeByte(convBool);
 		
-		out.writeDouble(latlng[0]);
-		out.writeDouble(latlng[1]);
+		//out.writeDouble(latlng[0]);
+		//out.writeDouble(latlng[1]);
+		
+		out.writeString(photo());
 	}
 	
 	public static final Parcelable.Creator<Clue> CREATOR

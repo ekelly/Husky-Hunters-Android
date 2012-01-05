@@ -120,7 +120,7 @@ public class CluesData {
 	}
 	
 	protected String getCluesUrl(String groupHash) {
-		return "http://hillcrest.roderic.us/api/teams/" + groupHash + "/clues/";
+		return "http://huskyhunter.roderic.us/api/teams/" + groupHash + "/clues/";
 	}
 	
 	protected String requestClues(String groupHash) {
@@ -166,19 +166,26 @@ public class CluesData {
 			for (int i = 0; i < jsonArray.length(); i++) {
 				JSONObject obj = jsonArray.getJSONObject(i);
 				
-				int clueNum = obj.getInt("clue_number");
+				int clueNum = obj.getInt("number");
 				String answer = obj.getString("answer");
-				String originalClue = obj.getString("original_text");
+				String originalClue = obj.getString("hint");
 				int points = obj.getInt("points");
-				String location = obj.getString("location");
-				boolean solved = obj.getBoolean("is_solved");
+				/* TODO: Talk to Roderic about the data he's sending
+				 * String location = obj.getString("location");
+				boolean solved = obj.getBoolean("is_solved"); */
+				String location = "";
+				boolean solved = false;
 				JSONArray ll = obj.getJSONArray("latlng");
-				double[] latlng = { (Double) ll.get(0), (Double) ll.get(1) };
+				double[] latlng = { 0.0, 0.0 };
+				if(ll.length() == 2) {
+					latlng[0] = (Double) ll.get(0);
+					latlng[1] = (Double) ll.get(1);
+				}
 				
 				clues.add(new Clue(clueNum, answer, originalClue, points, 
-						location, solved, latlng));
+						location, solved, /* latlng ,*/ ""));
 				
-				Log.i(TAG, obj.getString("original_text"));
+				Log.i(TAG, originalClue);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

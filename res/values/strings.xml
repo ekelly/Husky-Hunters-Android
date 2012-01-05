@@ -3,5 +3,6 @@
 
     <string name="hello">Hello World, HuntersActivity!</string>
     <string name="app_name">Husky-Hunters-Android</string>
+    <string name="nocontent">No clues or could not connect to the server</string>
 
 </resources>

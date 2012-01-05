@@ -21,7 +21,7 @@ import android.widget.Toast;
 public class HuntersActivity extends ListActivity {
 	private static final String TAG = "HuntersActivity";
 	
-	private static final String GROUP_HASH = "69577289";
+	private static final String GROUP_HASH = "97580414";
 	
 	ClueArray clues;
 	ArrayList<? extends Map<String, ?>> cluemap;	
@@ -42,8 +42,6 @@ public class HuntersActivity extends ListActivity {
 	         setListAdapter(mCluesData.getAdapter());
 	     } 
 	}
-
-	
 	
     /** Called when the activity is first created. */
     @Override
@@ -54,34 +52,6 @@ public class HuntersActivity extends ListActivity {
         if ( !mCluesData.isLoaded() ) {
         	new DownloadCluesTask().execute(mCluesData);
         }
-        
-        //setContentView(R.layout.main);
-        
-        // Popup "Loading..." indicator?
-        
-        
-        //JSONFetcher fetcher = new JSONFetcher("69577289");
-        //clues = fetcher.fetch();
-        
-        
-        // Remove loading indicator?
-        /*
-        clues = new ClueArray();
-        clues.add(new Clue(1, "This is the Answer", "This is the Original Clue", 
-        		70, "International Village", 3, false));
-        clues.add(new Clue(2, "This is the Answer for clue 2, which is really really long", 
-        		"This is the Original Clue", 50, "West Village C", 3, 
-        		true));
-        clues.add(new Clue(3, "This is the Answer for clue 3", 
-        		"This is the Original Clue", 100, "West Village H", 3, 
-        		false));
-        */
-        //cluemap = clues.mappify();
-        //clueAdapter = new ClueAdapter(this.getApplicationContext(), 
-        //		cluemap, R.layout.clue_item, 
-        //		new String[] { "clueNum", "answer", "points" }, 
-        //		new int[] { R.id.cluenum, R.id.answer, R.id.points } ); 
-        //setListAdapter(clueAdapter);
     }
     
     @Override
