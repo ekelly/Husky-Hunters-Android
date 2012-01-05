@@ -106,14 +106,14 @@ public class Clue implements Parcelable {
 		out.writeInt(points());
 		out.writeString(location());
 		
-		// Convert the boolean to a byte
-		byte convBool = -1;
-		if (solved()) {
-		    convBool = 1;
+		// Convert the solved boolean to a byte
+		// 1 = solved, 
+		
+		if(solved()) {
+			out.writeByte((byte) 1);
 		} else {
-		    convBool = 0;
+			out.writeByte((byte) 0);
 		}
-		out.writeByte(convBool);
 		
 		//out.writeDouble(latlng[0]);
 		//out.writeDouble(latlng[1]);
