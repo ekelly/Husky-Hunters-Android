@@ -294,9 +294,9 @@ public class ClueDbAdapter implements Closeable {
 	 * Returns a Cursor of all clues that match the given ClueID string.
 	 * @param clueId id to pattern match clues to retrieve
 	 * @return Cursor of all clues that match the given expression
-	 * @throws SQLException
+	 * @throws SQLException if clue could not be found/retrieved
 	 */
-	public Cursor fetchClue(String clueId) throws SQLException {
+	public Cursor filterClues(String clueId) throws SQLException {
 		Cursor mCursor = mDb.query(true, CLUE_TABLE,
 				new String[] { KEY_ROWID, KEY_CLUEID, KEY_ANS, KEY_TEXT,
 				KEY_POINTS, KEY_LOCATION, KEY_SOLVED, KEY_PHOTO_PATH, 

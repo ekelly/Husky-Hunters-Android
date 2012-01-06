@@ -3,6 +3,7 @@ package edu.neu.acm.huskyhunters;
 import java.io.Closeable;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.SQLException;
 import android.text.format.Time;
 import android.util.Log;
@@ -34,7 +35,7 @@ public class ClueDb implements Closeable {
 			lastUpdateTime.set(mDbHelper.getTime());
 		}
 		catch(SQLException ex) {
-			Log.e(TAG, "Failed to open clue database.", ex);
+			Log.e(TAG, ex.getMessage());
 		}
 	}
 
@@ -48,6 +49,42 @@ public class ClueDb implements Closeable {
 	public void setTimeToNow() {
 		lastUpdateTime.setToNow();
 		mDbHelper.setTime(lastUpdateTime.toMillis(false));
+	}
+	
+	public void firstTimeSync() {
+		throw new UnsupportedOperationException();
+	}
+	
+	public void updateSync() {
+		throw new UnsupportedOperationException();
+	}
+	
+	/**
+	 * Fetches all clues in the database.
+	 * @return A cursor over all clues in the database.
+	 */
+	public Cursor fetchAllClues() {
+		return mDbHelper.fetchAllClues();
+	}
+	
+	/**
+	 * Fetches a given clue by database row id.
+	 * @param rowId id of clue to retrieve
+	 * @return A cursor positioned at the clue, if found
+	 * @throws SQLException if clue could not be found/retrieved
+	 */
+	public Cursor fetchClue(long rowId) throws SQLException {
+		return mDbHelper.fetchClue(rowId);
+	}
+	
+	/**
+	 * Returns a Cursor of all clues whose Clue ID begins with the given String
+	 * @param clueId Clue ID to pattern match clues to retrieve
+	 * @return A Cursor over all matching clues
+	 * @throws SQLException if clue could not be found/retrieved
+	 */
+	public Cursor filterClues(String clueId) throws SQLException {
+		return mDbHelper.filterClues(clueId);
 	}
 	
 	
