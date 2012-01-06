@@ -1,5 +1,7 @@
 package edu.neu.acm.huskyhunters;
 
+import java.io.Closeable;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -11,15 +13,24 @@ import android.util.Log;
 /**
  * Simple clue database helper class.  Defines CRUD options for the database, 
  * and gives ability to list all clues, list a specific clue, or filter 
- * for a given clueId expression.
+ * for a given clueId expression.</br>
+ * Also includes a time table in which last update time is stored, 
+ * and getTime() and setTime() methods for updating.  Time is automatically 
+ * set to zero when the database is first created.
  * @author francis
  *
  */
-public class ClueDbAdapter {
+public class ClueDbAdapter implements Closeable {
 	// Debugging TAG
 	public static final String TAG = "ClueDbHelper";
+	
 
-	// Define column names for the sQLite DB
+	private static final String DB_NAME = "cluedata";
+	private static final String CLUE_TABLE = "clueTable";
+	private static final String TIME_TABLE = "timeTable";
+	private static final Integer DB_VERSION = 1;
+
+	// Define column names for the SQLite Clue DB
 	public static final String KEY_CLUEID = "clueid";
 	public static final String KEY_TEXT = "cluetext";
 	public static final String KEY_ANS = "ans";
@@ -29,9 +40,15 @@ public class ClueDbAdapter {
 	public static final String KEY_LOCATION = "location";
 	public static final String KEY_UPLOADED = "uploaded"; //boolean
 	public static final String KEY_ROWID = "_id";
+	
+	// Define column names for the SQLite Time DB
+	public static final String TIME_TIME = "time";
 
 	// photo path is a URI, but saved as a String
 	// use Uri.parse(s) and myUri.toString()
+	
+	// time is saved in Unix time format (integer)
+	// time value of 0 indicates database has never been synced
 
 	// Database creation command
 	/*private static final String DB_CREATE = 
@@ -40,12 +57,15 @@ public class ClueDbAdapter {
 			"solved integer not null, points integer not null, " + 
 			"photo_path text not null, location text not null);";*/
 
-	private static final String DB_CREATE = makeDatabaseCreator();
+	private static final String CLUEDB_CREATE = makeClueDatabaseCreator();
+	private static final String TIMEDB_CREATE = makeTimeDatabaseCreator();
+	private static final String SET_TIME_ZERO = 
+			"INSERT INTO " + TIME_TABLE + "VALUES(0);";
 
-	private static final String makeDatabaseCreator() {
+	private static final String makeClueDatabaseCreator() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("create table ");
-		sb.append(DB_TABLE);
+		sb.append(CLUE_TABLE);
 		sb.append(" (");
 		sb.append(KEY_ROWID);
 		sb.append(" integer primary key autoincrement, ");
@@ -67,10 +87,15 @@ public class ClueDbAdapter {
 		sb.append(" integer not null);");
 		return sb.toString();
 	}
-
-	private static final String DB_NAME = "data";
-	private static final String DB_TABLE = "clues";
-	private static final Integer DB_VERSION = 1;
+	
+	private static final String makeTimeDatabaseCreator() {
+		StringBuilder sb = new StringBuilder("create table ");
+		sb.append(TIME_TABLE);
+		sb.append(" (");
+		sb.append(TIME_TIME);
+		sb.append(" integer primary key);");
+		return sb.toString();
+	}
 
 	private final Context mCtx;
 
@@ -92,13 +117,15 @@ public class ClueDbAdapter {
 
 
 		/**
-		 * Creates the clues database.
+		 * Creates the database and the clues and time tables.
 		 * 
 		 * @param db the database to create.
 		 */
 		@Override
 		public void onCreate(SQLiteDatabase db) {
-			db.execSQL(DB_CREATE);
+			db.execSQL(CLUEDB_CREATE);
+			db.execSQL(TIMEDB_CREATE);
+			db.execSQL(SET_TIME_ZERO);
 		}
 
 		/**
@@ -120,7 +147,8 @@ public class ClueDbAdapter {
 		 * @param db The database to be initialized.
 		 */
 		public void clear(SQLiteDatabase db) {
-			db.execSQL("DROP TABLE IF EXISTS " + DB_TABLE);
+			db.execSQL("DROP TABLE IF EXISTS " + CLUE_TABLE);
+			db.execSQL("DROP TABLE IF EXISTS " + TIME_TABLE);
 			onCreate(db);
 		}
 
@@ -178,7 +206,7 @@ public class ClueDbAdapter {
 		cv.put(KEY_PHOTO_PATH, photo_path);
 		cv.put(KEY_UPLOADED, uploaded);
 
-		return mDb.insert(DB_TABLE, null, cv);
+		return mDb.insert(CLUE_TABLE, null, cv);
 	}
 
 	/**
@@ -187,7 +215,7 @@ public class ClueDbAdapter {
 	 * @return true if successful, false otherwise
 	 */
 	public boolean deleteClue(long rowID) {
-		return mDb.delete(DB_TABLE, KEY_ROWID + "=" + rowID, null) > 0;
+		return mDb.delete(CLUE_TABLE, KEY_ROWID + "=" + rowID, null) > 0;
 	}
 
 	/**
@@ -196,7 +224,7 @@ public class ClueDbAdapter {
 	 * @return true if successful, false otherwise
 	 */
 	public boolean deleteClue(String clueId) {
-		return mDb.delete(DB_TABLE, KEY_CLUEID + "=" + clueId, null) > 0;
+		return mDb.delete(CLUE_TABLE, KEY_CLUEID + "=" + clueId, null) > 0;
 	}
 
 	/**
@@ -230,7 +258,7 @@ public class ClueDbAdapter {
 		cv.put(KEY_PHOTO_PATH, photo_path);
 		cv.put(KEY_UPLOADED, uploaded);
 
-		return mDb.update(DB_TABLE, cv, KEY_CLUEID + "=" + clueId, null) > 0;
+		return mDb.update(CLUE_TABLE, cv, KEY_CLUEID + "=" + clueId, null) > 0;
 	}
 
 	/**
@@ -238,7 +266,7 @@ public class ClueDbAdapter {
 	 * @return a cursor over all clues in the database.
 	 */
 	public Cursor fetchAllClues() {
-		return mDb.query(DB_TABLE,
+		return mDb.query(CLUE_TABLE,
 				new String[] { KEY_ROWID, KEY_CLUEID, KEY_ANS, KEY_TEXT,
 				KEY_POINTS, KEY_LOCATION, KEY_SOLVED, KEY_PHOTO_PATH, 
 				KEY_UPLOADED },
@@ -252,7 +280,7 @@ public class ClueDbAdapter {
 	 * @throws SQLException if clue could not be found/retrieved
 	 */
 	public Cursor fetchClue(long rowId) throws SQLException {
-		Cursor mCursor = mDb.query(true, DB_TABLE,
+		Cursor mCursor = mDb.query(true, CLUE_TABLE,
 				new String[] { KEY_ROWID, KEY_CLUEID, KEY_ANS, KEY_TEXT,
 				KEY_POINTS, KEY_LOCATION, KEY_SOLVED, KEY_PHOTO_PATH, 
 				KEY_UPLOADED },
@@ -269,12 +297,26 @@ public class ClueDbAdapter {
 	 * @throws SQLException
 	 */
 	public Cursor fetchClue(String clueId) throws SQLException {
-		Cursor mCursor = mDb.query(true, DB_TABLE,
+		Cursor mCursor = mDb.query(true, CLUE_TABLE,
 				new String[] { KEY_ROWID, KEY_CLUEID, KEY_ANS, KEY_TEXT,
 				KEY_POINTS, KEY_LOCATION, KEY_SOLVED, KEY_PHOTO_PATH, 
 				KEY_UPLOADED },
 				KEY_CLUEID + " LIKE " + clueId + "%", null, null, null, null, null);
 		return mCursor;
+	}
+	
+	public void setTime(Integer t) {
+		ContentValues cv = new ContentValues();
+		cv.put(TIME_TIME, t);
+		mDb.update(TIME_TABLE, cv, null, null);
+	}
+	
+	public Integer getTime() {
+		Cursor c = mDb.rawQuery("SELECT * FROM " + TIME_TABLE, null);
+		c.moveToFirst();
+		int t = c.getInt(c.getColumnIndex(TIME_TIME));
+		c.close();
+		return t;
 	}
 
 }
