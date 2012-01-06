@@ -8,7 +8,13 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-
+/**
+ * Simple clue database helper class.  Defines CRUD options for the database, 
+ * and gives ability to list all clues, list a specific clue, or filter 
+ * for a given clueId expression.
+ * @author francis
+ *
+ */
 public class ClueDbAdapter {
 	// Debugging TAG
 	public static final String TAG = "ClueDbHelper";
