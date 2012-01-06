@@ -20,7 +20,7 @@ public class ClueDb implements Closeable {
 	// Context from which to work
 	private final Context mCtx;
 	
-	// long variable for storing last update time, saved in Unix format
+	// long variable for storing last update time, saved in UTC millis format
 	// Should be updated with database on every sync.
 	private Time lastUpdateTime;
 	
@@ -38,14 +38,35 @@ public class ClueDb implements Closeable {
 			Log.e(TAG, ex.getMessage());
 		}
 	}
-
+	
+	/**
+	 * Opens the clues database for writing.  If it cannot be opened, attempt 
+	 * to create a new instance.  If this is unsuccessful, throws an
+	 * exception.
+	 * @throws SQLException if database cannot be opened/created.
+	 */
+	public void open() throws SQLException {
+		try {
+			mDbHelper.open();
+			lastUpdateTime = new Time();
+			lastUpdateTime.set(mDbHelper.getTime());
+		}
+		catch(SQLException ex) {
+			Log.e(TAG, ex.getMessage());
+		}
+	}
+	
+	/**
+	 * Closes the database.
+	 */
 	@Override
 	public void close() {
-		
-		
+		mDbHelper.close();
 	}
-	// Updates the time store in the database to indicate the current time.
-	// Should be used when a sync is completed
+	/**
+	 * Updates the time store in the database to indicate the current time.
+	 * Should be used when a sync is completed.
+	 */
 	public void setTimeToNow() {
 		lastUpdateTime.setToNow();
 		mDbHelper.setTime(lastUpdateTime.toMillis(false));
@@ -53,9 +74,18 @@ public class ClueDb implements Closeable {
 	
 	public void firstTimeSync() {
 		throw new UnsupportedOperationException();
+		//setTimeToNow(); // when sync is done, update last updated time
 	}
 	
 	public void updateSync() {
+		throw new UnsupportedOperationException();
+		//setTimeToNow(); // when sync is done, update last updated time
+	}
+	
+	/**
+	 * Syncs to server.  Calls appropriate sync method.
+	 */
+	public void sync() {
 		throw new UnsupportedOperationException();
 	}
 	
