@@ -47,7 +47,7 @@ public class ClueDbAdapter implements Closeable {
 	// photo path is a URI, but saved as a String
 	// use Uri.parse(s) and myUri.toString()
 	
-	// time is saved in Unix time format (integer)
+	// time is saved in UTC milliseconds time format (long)
 	// time value of 0 indicates database has never been synced
 
 	// Database creation command
@@ -305,13 +305,13 @@ public class ClueDbAdapter implements Closeable {
 		return mCursor;
 	}
 	
-	public void setTime(Integer t) {
+	public void setTime(long t) {
 		ContentValues cv = new ContentValues();
 		cv.put(TIME_TIME, t);
 		mDb.update(TIME_TABLE, cv, null, null);
 	}
 	
-	public Integer getTime() {
+	public long getTime() {
 		Cursor c = mDb.rawQuery("SELECT * FROM " + TIME_TABLE, null);
 		c.moveToFirst();
 		int t = c.getInt(c.getColumnIndex(TIME_TIME));
