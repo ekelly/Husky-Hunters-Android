@@ -21,7 +21,6 @@ public class HuntersActivity extends ListActivity {
 	ArrayList<? extends Map<String, ?>> cluemap;	
 	CluesData mCluesData;
 	
-	
 	class DownloadCluesTask extends AsyncTask<CluesData, Integer, CluesData>{
 
 		@Override

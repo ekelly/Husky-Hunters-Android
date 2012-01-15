@@ -1,12 +1,6 @@
 package edu.neu.acm.huskyhunters;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
-
-import com.android.demo.notepad1.NotesDbAdapter;
-import com.android.demo.notepad1.R;
-
 import android.app.ListActivity;
 import android.content.Intent;
 import android.database.Cursor;
@@ -22,40 +16,33 @@ public class HuntersActivityDb extends ListActivity {
 	
 	private static final String GROUP_HASH = "97580414";
 	
-	//ClueArray clues;
-	//ArrayList<? extends Map<String, ?>> cluemap;	
-	//CluesData mCluesData;
-	
 	ClueDb clues;
 	
-	
-	/*class DownloadCluesTask extends AsyncTask<CluesData, Integer, CluesData>{
+	class DownloadCluesTask extends AsyncTask<ClueDb, Integer, ClueDb>{
 
 		@Override
-		protected CluesData doInBackground(CluesData... params) {
-	      CluesData clue = params[0];
-		  clue.load(GROUP_HASH);
-		  return clue;
+		protected ClueDb doInBackground(ClueDb... params) {
+	      ClueDb clueDb = params[0];
+		  //clues.load(GROUP_HASH);
+	      clueDb.sync(GROUP_HASH);
+		  return clueDb;
 		}
 		
-	     protected void onPostExecute(CluesData result) {
-	    	 mCluesData = result;
-	         setListAdapter(mCluesData.getAdapter());
+	     protected void onPostExecute(ClueDb result) {
+	    	 clues = result;
+	    	 // Set the list adapter
+	         setListAdapter(clues.getAdapter());
 	     }
-	}*/
+	}
 	
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        clues = new ClueDb(this);
+        clues = ClueDb.clues(this);
+        new DownloadCluesTask().execute(clues);
         setContentView(R.layout.clue_list);
-        clues.sync();
         fillData();
-        //mCluesData = CluesData.getInstance(getApplicationContext());
-        //if ( !mCluesData.isLoaded() ) {
-        //	new DownloadCluesTask().execute(mCluesData);
-        //}
     }
     
     @Override
@@ -65,7 +52,7 @@ public class HuntersActivityDb extends ListActivity {
 		Intent intent = new Intent(this, ClueDetail.class);
 		Bundle bundle = new Bundle();
 		bundle.putInt("cluenum", Integer.parseInt(item.get("clueNum")));
-		bundle.putParcelableArrayList("clues", mCluesData.getArray());
+		//bundle.putParcelableArrayList("clues", mCluesData.getArray());
 		intent.putExtras(bundle);
 		startActivityForResult(intent, R.integer.clue_result);
 	}
@@ -79,7 +66,7 @@ public class HuntersActivityDb extends ListActivity {
 		    		Integer index = res.getInt("cluenum");
 		    		if(picTaken) {
 		    			// Sets clue to boolean and returns itself
-		    			clues.get(index).setSolved(picTaken);
+		    			// clues.get(index).setSolved(picTaken);
 		    			
 		    			// Reset the list adapter
 		    			CluesData.getInstance(getApplicationContext());
@@ -101,6 +88,7 @@ public class HuntersActivityDb extends ListActivity {
 		    		Integer cluenum = res.getInt("cluenum");
 		    		if(solved) {
 		    			// Sets clue to boolean and returns itself
+		    			/*
 		    			ClueArray clues = (ClueArray) mCluesData.getArray();
 		    			for(int i = 0; i < clues.size(); i++) {
 		    				if(clues.get(i).clueNum() == cluenum) {
@@ -109,6 +97,7 @@ public class HuntersActivityDb extends ListActivity {
 		    					break;
 		    				}
 		    			}
+		    			*/
 		    			// Reset the list
 		    	        setListAdapter(CluesData.getInstance(this
 		    	        		.getApplicationContext()).getAdapter());

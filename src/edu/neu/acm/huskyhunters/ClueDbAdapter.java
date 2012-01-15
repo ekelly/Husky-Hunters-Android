@@ -13,7 +13,7 @@ import android.util.Log;
 /**
  * Simple clue database helper class.  Defines CRUD options for the database, 
  * and gives ability to list all clues, list a specific clue, or filter 
- * for a given clueId expression.</br>
+ * for a given clueId expression.
  * Also includes a time table in which last update time is stored, 
  * and getTime() and setTime() methods for updating.  Time is automatically 
  * set to zero when the database is first created.

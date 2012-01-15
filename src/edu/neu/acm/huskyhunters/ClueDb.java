@@ -20,6 +20,9 @@ public class ClueDb implements Closeable {
 	// Context from which to work
 	private final Context mCtx;
 	
+	// Singleton instance of the class
+	private static ClueDb sInstance;
+	
 	// long variable for storing last update time, saved in UTC millis format
 	// Should be updated with database on every sync.
 	private Time lastUpdateTime;
@@ -37,6 +40,13 @@ public class ClueDb implements Closeable {
 		catch(SQLException ex) {
 			Log.e(TAG, ex.getMessage());
 		}
+	}
+	
+	public static ClueDb clues(Context ctx) {
+		if(sInstance == null) {
+			sInstance = new ClueDb(ctx);
+		}
+		return sInstance;
 	}
 	
 	/**
@@ -85,7 +95,7 @@ public class ClueDb implements Closeable {
 	/**
 	 * Syncs to server.  Calls appropriate sync method.
 	 */
-	public void sync() {
+	public void sync(String hash) {
 		throw new UnsupportedOperationException();
 	}
 	
