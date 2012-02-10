@@ -17,7 +17,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class ClueDetail extends Activity {
+public class ClueDetailActivity extends Activity {
 	
 	Clue clue;
 	boolean solved;
