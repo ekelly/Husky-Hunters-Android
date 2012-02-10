@@ -227,7 +227,7 @@ public class CluesData implements Closeable {
 	 * @author eric
 	 */
 	private String getCluesUrl(String groupHash) {
-		return "http://huskyhunter.roderic.us/api/teams/" + groupHash + "/clues/";
+		return "http://huskyhunter.roderic.us/api/teams/" + groupHash + "/clues";
 	}
 	
 	/**
@@ -370,7 +370,7 @@ public class CluesData implements Closeable {
 		private static final String CLUEDB_CREATE = makeClueDatabaseCreator();
 		private static final String TIMEDB_CREATE = makeTimeDatabaseCreator();
 		private static final String SET_TIME_ZERO = 
-				"INSERT INTO " + TIME_TABLE + "VALUES(0);";
+				"INSERT INTO " + TIME_TABLE + " VALUES(0);";
 
 		private static final String makeClueDatabaseCreator() {
 			StringBuilder sb = new StringBuilder();
@@ -553,20 +553,21 @@ public class CluesData implements Closeable {
 		 * @param answer the answer text of the clue.
 		 * @param originalClue the original text of the clue.
 		 * @param points the point value of the clue.
-		 * @param location the location of the clue (?)
+		 * @param location the location of the clue (Double[])
 		 * @param solved whether the clue is solved or not
 		 * @param photo_path the path to the photo as a serialized URI (may be null)
 		 * @param uploaded a boolean indicating whether the photo has been uploaded
 		 * @return true if the clue was successfully updated, false otherwise
 		 */
 		public boolean updateClue(String clueId, String answer, String originalClue,
-				Integer points, String location, Boolean solved,
+				Integer points, Double[] location, String solved,
 				String photo_path, Boolean uploaded) {
 			ContentValues cv = new ContentValues();
 			cv.put(KEY_ANS, answer);
 			cv.put(KEY_TEXT, originalClue);
 			cv.put(KEY_POINTS, points);
-			cv.put(KEY_LOCATION, location);
+			cv.put(KEY_LOCATION_X, location[0]);
+			cv.put(KEY_LOCATION_Y, location[1]);
 			cv.put(KEY_SOLVED, solved);
 			cv.put(KEY_PHOTO_PATH, photo_path);
 			cv.put(KEY_UPLOADED, uploaded);
@@ -581,7 +582,7 @@ public class CluesData implements Closeable {
 		public Cursor fetchAllClues() {
 			return mDb.query(CLUE_TABLE,
 					new String[] { KEY_ROWID, KEY_CLUEID, KEY_ANS, KEY_TEXT,
-					KEY_POINTS, KEY_LOCATION, KEY_SOLVED, KEY_PHOTO_PATH, 
+					KEY_POINTS, KEY_LOCATION_X, KEY_LOCATION_Y, KEY_SOLVED, KEY_PHOTO_PATH, 
 					KEY_UPLOADED },
 					null, null, null, null, null);
 		}
@@ -595,7 +596,7 @@ public class CluesData implements Closeable {
 		public Cursor fetchClue(long rowId) throws SQLException {
 			Cursor mCursor = mDb.query(true, CLUE_TABLE,
 					new String[] { KEY_ROWID, KEY_CLUEID, KEY_ANS, KEY_TEXT,
-					KEY_POINTS, KEY_LOCATION, KEY_SOLVED, KEY_PHOTO_PATH, 
+					KEY_POINTS, KEY_LOCATION_X, KEY_LOCATION_Y, KEY_SOLVED, KEY_PHOTO_PATH, 
 					KEY_UPLOADED },
 					KEY_ROWID + "=" + rowId, null, null, null, null, null);
 			if (mCursor != null)
@@ -612,7 +613,7 @@ public class CluesData implements Closeable {
 		public Cursor filterClues(String clueId) throws SQLException {
 			Cursor mCursor = mDb.query(true, CLUE_TABLE,
 					new String[] { KEY_ROWID, KEY_CLUEID, KEY_ANS, KEY_TEXT,
-					KEY_POINTS, KEY_LOCATION, KEY_SOLVED, KEY_PHOTO_PATH, 
+					KEY_POINTS, KEY_LOCATION_X, KEY_LOCATION_Y, KEY_SOLVED, KEY_PHOTO_PATH, 
 					KEY_UPLOADED },
 					KEY_CLUEID + " LIKE " + clueId + "%", null, null, null, null, null);
 			return mCursor;

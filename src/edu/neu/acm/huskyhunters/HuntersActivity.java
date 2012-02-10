@@ -19,24 +19,24 @@ import android.widget.Toast;
 public class HuntersActivity extends ListActivity {
 	private static final String TAG = "HuntersActivityDb";
 	
-	private static final String GROUP_HASH = "97580414";
-	
 	CluesData clues;
+	SimpleCursorAdapter cluesAdapter;
 	
-	class DownloadCluesTask extends AsyncTask<CluesData, Integer, CluesData>{
+	private static final String GROUP_HASH = "1480092";
+	
+	class DownloadCluesTask extends AsyncTask<String, Integer, CluesData>{
 
 		@Override
-		protected CluesData doInBackground(CluesData... params) {
-	      CluesData clueDb = params[0];
-		  //clues.load(GROUP_HASH);
-	      clueDb.sync(GROUP_HASH);
-		  return clueDb;
+		protected CluesData doInBackground(String... params) {
+	      String groupHash = params[0];
+	      clues.sync(groupHash);
+		  return clues;
 		}
 		
 	     protected void onPostExecute(CluesData result) {
 	    	 clues = result;
-	    	 // Set the list adapter
-	         //setListAdapter(clues.getAdapter());
+	    	 // Update the list
+	    	 clues.getAdapter().notifyDataSetChanged();
 	     }
 	}
 	
@@ -45,9 +45,9 @@ public class HuntersActivity extends ListActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         clues = CluesData.getInstance(this);
-        new DownloadCluesTask().execute(clues);
-        setContentView(R.layout.clue_list);
         fillData();
+        new DownloadCluesTask().execute(GROUP_HASH);
+        setContentView(R.layout.clue_list);
     }
     
     @Override
@@ -121,12 +121,7 @@ public class HuntersActivity extends ListActivity {
     private void fillData() {
 		Cursor c = clues.fetchAllClues();
 		startManagingCursor(c);
-		
-		String[] from = new String[] { ClueDbAdapter.KEY_CLUEID, ClueDbAdapter.KEY_TEXT };
-		int[] to = new int[] { R.id.clueid, R.id.cluedesc };
-		
-		SimpleCursorAdapter notes = 
-				new SimpleCursorAdapter(this, R.layout.clue_row, c, from, to);
-		setListAdapter(notes);
+		cluesAdapter = clues.getAdapter();
+		setListAdapter(cluesAdapter);
 	}
 }
