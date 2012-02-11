@@ -22,6 +22,7 @@ public class ClueDetailActivity extends Activity {
 	Clue clue;
 	boolean solved;
 	Uri imageUri;
+	CluesData clues;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -30,7 +31,13 @@ public class ClueDetailActivity extends Activity {
 		
 		Intent intent = getIntent();
 		Bundle data = intent.getExtras();
-		int cluenum = data.getInt("cluenum");
+		Integer cluenum = data.getInt("cluenum");
+		clues = CluesData.getInstance(getApplicationContext());
+		Cursor clueCursor = clues.filterClues(cluenum.toString());
+		startManagingCursor(clueCursor);
+		clue = new Clue(clueCursor);
+		
+		/*
 		ArrayList<Clue> clues = data.getParcelableArrayList("clues");
 		for(int i = 0; i < clues.size(); i++) {
 			if(clues.get(i).clueNum() == cluenum) {
@@ -41,6 +48,7 @@ public class ClueDetailActivity extends Activity {
 		if(clue == null) {
 			throw new RuntimeException("Selected clue wasn't in data set");
 		}
+		*/
 		
 		// Set content in the view
 		View status = findViewById(R.id.detail_status);
@@ -88,7 +96,7 @@ public class ClueDetailActivity extends Activity {
 		   conData.putParcelable("photo", imageUri);
 	   }
 	   conData.putBoolean("solved", solved);
-	   conData.putInt("cluenum", clue.clueNum());
+	   conData.putString("cluenum", clue.clueNum());
 	   Intent intent = new Intent();
 	   intent.putExtras(conData);
 	   setResult(RESULT_OK, intent);

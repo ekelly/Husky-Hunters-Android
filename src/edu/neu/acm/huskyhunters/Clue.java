@@ -2,13 +2,14 @@ package edu.neu.acm.huskyhunters;
 
 import java.util.HashMap;
 
+import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
 public class Clue implements Parcelable {
 
-	private Integer clueNum;
+	private String clueNum;
 	private String answer;
 	private String clue;
 	private Integer points;
@@ -17,7 +18,7 @@ public class Clue implements Parcelable {
 	//private double[] latlng;
 	private String photo;
 	
-	public Integer clueNum() {
+	public String clueNum() {
 		return clueNum;
 	}
 	public Integer points() {
@@ -48,7 +49,7 @@ public class Clue implements Parcelable {
 		return photo;
 	}
 	
-	public Clue(int clueNum, String answer, String clue, int points, 
+	public Clue(String clueNum, String answer, String clue, int points, 
 			String location, boolean solved, /* double[] ll, */ String photo) {
 		this.clueNum = clueNum;
 		this.answer = answer;
@@ -61,7 +62,7 @@ public class Clue implements Parcelable {
 	}
 	
 	Clue(Parcel in) {
-		clueNum = in.readInt();
+		clueNum = in.readString();
 		answer = in.readString();
 		clue = in.readString();
 		points = in.readInt();
@@ -82,6 +83,18 @@ public class Clue implements Parcelable {
 		photo = in.readString();
 	}
 	
+	Clue(Cursor c) {
+		c.moveToFirst();
+		int temp = c.getCount();
+		this.clueNum  = c.getString(c.getColumnIndex("clueid"));
+		this.answer   = c.getString(c.getColumnIndex("ans"));
+		this.clue     = c.getString(c.getColumnIndex("cluetext"));
+		this.points   = c.getInt(c.getColumnIndex("points"));
+		this.location = "";
+		this.solved   = false; // c.getString(c.getColumnIndex("solved"));
+		this.photo    = c.getString(c.getColumnIndex("photo_path"));
+	}
+	
 	public HashMap<String, String> toMap() {
 		HashMap<String, String> map = new HashMap<String, String>();
 		map.put("clueNum", clueNum.toString());
@@ -100,7 +113,7 @@ public class Clue implements Parcelable {
 	}
 	@Override
 	public void writeToParcel(Parcel out, int flags) {
-		out.writeInt(clueNum());
+		out.writeString(clueNum());
 		out.writeString(answer());
 		out.writeString(clue());
 		out.writeInt(points());

@@ -7,8 +7,11 @@ import edu.neu.acm.huskyhunters.R.id;
 import edu.neu.acm.huskyhunters.R.integer;
 import edu.neu.acm.huskyhunters.R.layout;
 import android.app.ListActivity;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteCursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
@@ -21,23 +24,37 @@ public class HuntersActivity extends ListActivity {
 	
 	CluesData clues;
 	SimpleCursorAdapter cluesAdapter;
+	Context context = this;
 	
 	private static final String GROUP_HASH = "1480092";
 	
 	class DownloadCluesTask extends AsyncTask<String, Integer, CluesData>{
+		
+		ProgressDialog loading;
 
 		@Override
 		protected CluesData doInBackground(String... params) {
-	      String groupHash = params[0];
-	      clues.sync(groupHash);
-		  return clues;
+			String groupHash = params[0];
+			clues.sync(groupHash);
+			return clues;
 		}
 		
-	     protected void onPostExecute(CluesData result) {
-	    	 clues = result;
-	    	 // Update the list
-	    	 clues.getAdapter().notifyDataSetChanged();
-	     }
+		@Override
+		protected void onPreExecute() {
+			loading = new ProgressDialog(context);
+			loading.setMessage("Downloading clues");
+			loading.show();
+		}
+		
+		@Override
+		protected void onPostExecute(CluesData result) {
+			clues = result;
+			// Update the list
+			clues.getAdapter().notifyDataSetChanged();
+			if(loading.isShowing()) {
+				loading.dismiss();
+			}
+		}
 	}
 	
     /** Called when the activity is first created. */
@@ -52,12 +69,12 @@ public class HuntersActivity extends ListActivity {
     
     @Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
-		@SuppressWarnings("unchecked")
-		HashMap<String, String> item = (HashMap<String, String>) getListAdapter().getItem(position);
+		SQLiteCursor item = (SQLiteCursor) getListAdapter().getItem(position);
+		item.moveToFirst();
+		String clueid = item.getString(item.getColumnIndex("clueid"));
 		Intent intent = new Intent(this, ClueDetailActivity.class);
 		Bundle bundle = new Bundle();
-		bundle.putInt("cluenum", Integer.parseInt(item.get("clueNum")));
-		//bundle.putParcelableArrayList("clues", mCluesData.getArray());
+		bundle.putInt("cluenum", Integer.parseInt(clueid));
 		intent.putExtras(bundle);
 		startActivityForResult(intent, R.integer.clue_result);
 	}

@@ -241,6 +241,7 @@ public class CluesData implements Closeable {
 	 * @author eric
 	 */
 	private Boolean firstTimeSync(String groupHash) {
+		mDbHelper.clear();
 		try {
 			parseClues(requestClues(groupHash));
 		} catch(Exception e) {
@@ -333,7 +334,7 @@ public class CluesData implements Closeable {
 	 * set to zero when the database is first created.
 	 * @author francis
 	 */
-	private static class ClueDbAdapter implements Closeable {
+	public static class ClueDbAdapter implements Closeable {
 		// Debugging TAG
 		public static final String TAG = "ClueDbHelper";
 		
@@ -347,7 +348,7 @@ public class CluesData implements Closeable {
 		public static final String KEY_CLUEID = "clueid";
 		public static final String KEY_TEXT = "cluetext";
 		public static final String KEY_ANS = "ans";
-		public static final String KEY_SOLVED = "solved"; //boolean
+		public static final String KEY_SOLVED = "solved"; // String
 		public static final String KEY_POINTS = "points";
 		public static final String KEY_PHOTO_PATH = "photo_path";
 		public static final String KEY_LOCATION_X = "locationX";
@@ -620,7 +621,7 @@ public class CluesData implements Closeable {
 					new String[] { KEY_ROWID, KEY_CLUEID, KEY_ANS, KEY_TEXT,
 					KEY_POINTS, KEY_LOCATION_X, KEY_LOCATION_Y, KEY_SOLVED, KEY_PHOTO_PATH, 
 					KEY_UPLOADED },
-					KEY_CLUEID + " LIKE " + clueId + "%", null, null, null, null, null);
+					KEY_CLUEID + " LIKE \"" + clueId + "%\"", null, null, null, null, null);
 			return mCursor;
 		}
 		
