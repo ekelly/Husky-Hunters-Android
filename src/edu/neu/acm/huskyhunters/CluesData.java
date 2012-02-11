@@ -158,21 +158,25 @@ public class CluesData implements Closeable {
 			for (int i = 0; i < jsonArray.length(); i++) {
 				JSONObject obj = jsonArray.getJSONObject(i);
 				
-				String clueid = obj.getString("clueid");
+				/*String clueid = obj.getString("clueid");*/
+				String clueid = ((Integer) obj.getInt("number")).toString();
 				String answer = obj.getString("answer");
-				String originalClue = obj.getString("clue");
+				/*String originalClue = obj.getString("clue");*/
+				String originalClue = obj.getString("hint");
 				int points = obj.getInt("points");
-				String solved = obj.getString("solved");
-				JSONArray ll = obj.getJSONArray("location");
+				/*String solved = obj.getString("solved");*/
+				JSONArray ll = obj.getJSONArray("latlng");
 				Double[] latlng = { 0.0, 0.0 };
 				if(ll.length() == 2) {
 					latlng[0] = (Double) ll.get(0);
 					latlng[1] = (Double) ll.get(1);
 				}
 				
+				String solved = "unsolved";
+				
 				// Add to database
 				mDbHelper.insertClue(clueid, answer, originalClue, points, 
-						latlng, solved, null, null);
+						latlng, solved, null, false);
 				
 				Log.i(TAG, originalClue);
 			}
@@ -264,7 +268,8 @@ public class CluesData implements Closeable {
 	 * Syncs to server.  Calls appropriate sync method.
 	 */
 	public void sync(String hash) {
-		throw new UnsupportedOperationException();
+		//throw new UnsupportedOperationException();
+		firstTimeSync(hash);
 	}
 	
 	/**
