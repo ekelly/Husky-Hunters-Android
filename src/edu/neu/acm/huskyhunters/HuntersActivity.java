@@ -70,7 +70,6 @@ public class HuntersActivity extends ListActivity {
     @Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		SQLiteCursor item = (SQLiteCursor) getListAdapter().getItem(position);
-		item.moveToFirst();
 		String clueid = item.getString(item.getColumnIndex("clueid"));
 		Intent intent = new Intent(this, ClueDetailActivity.class);
 		Bundle bundle = new Bundle();
