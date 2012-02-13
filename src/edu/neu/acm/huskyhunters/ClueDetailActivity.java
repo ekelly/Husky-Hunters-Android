@@ -52,7 +52,7 @@ public class ClueDetailActivity extends Activity {
 		
 		// Set content in the view
 		View status = findViewById(R.id.detail_status);
-		if(clue.solved()) {
+		if(clue.solved() == "solved") {
 			status.setBackgroundColor(android.graphics.Color.GREEN);
 		}
 		TextView clueView = (TextView) findViewById(R.id.detail_cluenum);
@@ -122,7 +122,7 @@ public class ClueDetailActivity extends Activity {
 		    	*/
 	     		if (resultCode == RESULT_OK) {
 	     	        // use imageUri to get image result
-	     			clue.setSolved(true);
+	     			clue.setSolved("solved");
 	     			View status = findViewById(R.id.detail_status);
 	     			status.setBackgroundColor(Color.GREEN);
 	     			Toast.makeText(this, "Picture taken!", Toast.LENGTH_SHORT).show();

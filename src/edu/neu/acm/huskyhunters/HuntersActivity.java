@@ -1,11 +1,6 @@
 package edu.neu.acm.huskyhunters;
 
-import java.util.HashMap;
-
 import edu.neu.acm.huskyhunters.R;
-import edu.neu.acm.huskyhunters.R.id;
-import edu.neu.acm.huskyhunters.R.integer;
-import edu.neu.acm.huskyhunters.R.layout;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -50,7 +45,7 @@ public class HuntersActivity extends ListActivity {
 		protected void onPostExecute(CluesData result) {
 			clues = result;
 			// Update the list
-			clues.getAdapter().notifyDataSetChanged();
+			setListAdapter(clues.getAdapter());
 			if(loading.isShowing()) {
 				loading.dismiss();
 			}

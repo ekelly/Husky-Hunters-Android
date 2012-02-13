@@ -81,7 +81,6 @@ public class CluesData implements Closeable {
 		 * @param to The views that should display column in the "from" parameter. These should all be TextViews. The first N views in this list are given the values of the first N columns in the from parameter. Can be null if the cursor is not available yet.
 		 * @param flags Flags used to determine the behavior of the adapter, as per CursorAdapter(Context, Cursor, int).
 		 */
-		
 		public CluesAdapter(Context context, Cursor c) {
 			super(context, layout, c, from, to);
 		}
@@ -150,7 +149,8 @@ public class CluesData implements Closeable {
 	 * @param data JSON representation of the clues
 	 * @author eric
 	 */
-	private void parseClues(String data) {
+	private ArrayList<Clue> parseClues(String data) {
+		ArrayList<Clue> clueList = new ArrayList<Clue>();
 		try {
 			JSONArray jsonArray = new JSONArray(data);
 			Log.i(TAG, "Number of entries " + jsonArray.length());
@@ -174,15 +174,16 @@ public class CluesData implements Closeable {
 				
 				String solved = "unsolved";
 				
-				// Add to database
-				mDbHelper.insertClue(clueid, answer, originalClue, points, 
-						latlng, solved, null, false);
+				clueList.add(new Clue(clueid, answer, originalClue, 
+						points, "", solved, latlng, null));
 				
 				Log.i(TAG, originalClue);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		return clueList;
 	}
 	
 	/**
@@ -243,7 +244,12 @@ public class CluesData implements Closeable {
 	private Boolean firstTimeSync(String groupHash) {
 		mDbHelper.clear();
 		try {
-			parseClues(requestClues(groupHash));
+			ArrayList<Clue> clueList = parseClues(requestClues(groupHash));
+			for(Clue c : clueList) {
+				// Add to database
+				mDbHelper.insertClue(c);
+			}
+			setTimeToNow();
 		} catch(Exception e) {
 			e.printStackTrace();
 			mIsLoaded = false;
@@ -526,6 +532,19 @@ public class CluesData implements Closeable {
 			cv.put(KEY_UPLOADED, uploaded);
 
 			return mDb.insert(CLUE_TABLE, null, cv);
+		}
+		
+		public long insertClue(Clue clue) {
+			String clueId = clue.clueNum();
+			String answer = clue.answer();
+			String originalClue = clue.clue();
+			Integer points = clue.points();
+			Double[] latlng = clue.latlng();
+			String solved = clue.solved();
+			String photo_path = clue.photo();
+			Boolean uploaded = false;
+			return this.insertClue(clueId, answer, originalClue, points, 
+					latlng, solved, photo_path, uploaded);
 		}
 
 		/**
