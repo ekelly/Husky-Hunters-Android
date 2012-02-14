@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
-    android:background="@color/white"
+    android:background="@drawable/list_item_bgcolor"
     android:id="@+id/list_status" >
     
     <TextView
@@ -12,7 +12,7 @@
         android:layout_height="match_parent"
         android:layout_weight="0.70"
         android:padding="10dip"
-        android:textColor="@color/black" />
+        android:textColor="@color/list_item_textcolor" />
 
     <TextView
         android:id="@+id/answer"
@@ -22,7 +22,7 @@
         android:ellipsize="end"
         android:singleLine="true"
         android:padding="10dip"
-        android:textColor="@color/black" />
+        android:textColor="@color/list_item_textcolor" />
 
     <TextView
         android:id="@+id/points"
@@ -30,6 +30,6 @@
         android:layout_height="match_parent"
         android:layout_weight="0.70"
         android:padding="10dip"
-        android:textColor="@color/black" />
+        android:textColor="@color/list_item_textcolor" />
 
 </LinearLayout>

@@ -37,19 +37,6 @@ public class ClueDetailActivity extends Activity {
 		startManagingCursor(clueCursor);
 		clue = new Clue(clueCursor);
 		
-		/*
-		ArrayList<Clue> clues = data.getParcelableArrayList("clues");
-		for(int i = 0; i < clues.size(); i++) {
-			if(clues.get(i).clueNum() == cluenum) {
-				clue = clues.get(i);
-				break;
-			}
-		}
-		if(clue == null) {
-			throw new RuntimeException("Selected clue wasn't in data set");
-		}
-		*/
-		
 		// Set content in the view
 		View status = findViewById(R.id.detail_status);
 		if(clue.solved() == "solved") {
