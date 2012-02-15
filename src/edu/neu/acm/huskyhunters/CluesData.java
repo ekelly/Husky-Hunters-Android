@@ -25,8 +25,12 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.text.format.Time;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CursorAdapter;
+import android.widget.FilterQueryProvider;
+import android.widget.Filterable;
 import android.widget.SimpleCursorAdapter;
 
 /**
@@ -60,7 +64,7 @@ public class CluesData implements Closeable {
 	 * didn't need to change anything
 	 * @author eric
 	 */
-	private static class CluesAdapter extends SimpleCursorAdapter {
+	private static class CluesAdapter extends SimpleCursorAdapter implements Filterable {
 		
 		private static final String[] from = new String[] { 
 			ClueDbAdapter.KEY_CLUEID,
@@ -71,6 +75,8 @@ public class CluesData implements Closeable {
 			R.id.cluenum, R.id.answer, R.id.points
 		};
 		private static final int layout = R.layout.clue_item;
+		
+		Context context;
 		
 		/**
 		 * Constructor for CluesAdapter
@@ -83,12 +89,30 @@ public class CluesData implements Closeable {
 		 */
 		public CluesAdapter(Context context, Cursor c) {
 			super(context, layout, c, from, to);
+			this.context = context;
 		}
 		
 		@Override
 		public void bindView(View row, Context context, Cursor cursor) {
 			super.bindView(row, context, cursor);
 		}
+
+		@Override
+		public View newView(Context context, Cursor cursor, ViewGroup parent) {
+	        final LayoutInflater inflater = LayoutInflater.from(context);
+	        View v = inflater.inflate(layout, parent, false);
+	        String solved = cursor.getString(cursor.getColumnIndex("solved"));
+	        if(solved == "solved") {
+	        	v.setBackgroundColor(R.color.green);
+	        }
+	        return v;
+		}
+		
+		@Override
+		public Cursor runQueryOnBackgroundThread(CharSequence constraint) {
+			String filter = (String) constraint;
+	        return getInstance(context).filterClues(filter);
+		}		
 	}
 	
 	public CluesData(Context ctx) {
@@ -276,7 +300,10 @@ public class CluesData implements Closeable {
 	 */
 	public void sync(String hash) {
 		//throw new UnsupportedOperationException();
+		// if time > 24 hours old or empty  
 		firstTimeSync(hash);
+		// else
+		// updateSync();
 	}
 	
 	/**
@@ -328,7 +355,10 @@ public class CluesData implements Closeable {
 	 * @return A SimpleCursorAdapter
 	 */
 	public SimpleCursorAdapter getAdapter() {
-		return new CluesAdapter(mCtx, fetchAllClues());
+		CluesAdapter adapter = new CluesAdapter(mCtx, fetchAllClues());
+		Integer clueidCol = adapter.getCursor().getColumnIndexOrThrow("clueid");
+		adapter.setStringConversionColumn(clueidCol);
+		return adapter;
 	}
 	
 	/**

@@ -9,7 +9,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteCursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
@@ -20,6 +23,7 @@ public class HuntersActivity extends ListActivity {
 	CluesData clues;
 	SimpleCursorAdapter cluesAdapter;
 	Context context = this;
+	EditText filterText = null;
 	
 	private static final String GROUP_HASH = "1480092";
 	
@@ -60,7 +64,20 @@ public class HuntersActivity extends ListActivity {
         fillData();
         new DownloadCluesTask().execute(GROUP_HASH);
         setContentView(R.layout.clue_list);
+        this.getListView().setTextFilterEnabled(true);
+        filterText = (EditText) findViewById(R.id.search_box);
+        filterText.addTextChangedListener(filterTextWatcher);
     }
+    
+    private TextWatcher filterTextWatcher = new TextWatcher() {
+        public void afterTextChanged(Editable s) {}
+        public void beforeTextChanged(CharSequence s, int start, int count,
+                int after) {}
+        public void onTextChanged(CharSequence s, int start, int before,
+                int count) {
+            cluesAdapter.getFilter().filter(s);
+        }
+    };
     
     @Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
@@ -135,4 +152,10 @@ public class HuntersActivity extends ListActivity {
 		cluesAdapter = clues.getAdapter();
 		setListAdapter(cluesAdapter);
 	}
+    
+    @Override
+    protected void onDestroy() {
+    	super.onDestroy();
+    	filterText.removeTextChangedListener(filterTextWatcher);
+    }
 }
