@@ -1,5 +1,7 @@
 package edu.neu.acm.huskyhunters;
 
+import edu.neu.acm.huskyhunters.Constants;
+
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.IOException;
@@ -28,8 +30,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CursorAdapter;
-import android.widget.FilterQueryProvider;
 import android.widget.Filterable;
 import android.widget.SimpleCursorAdapter;
 
@@ -49,7 +49,7 @@ public class CluesData implements Closeable {
 	private static CluesData sInstance = null;
 	
 	// Switch for data being loaded
-	private static Boolean mIsLoaded;
+	//private static Boolean mIsLoaded;
 	
 	// long variable for storing last update time, saved in UTC millis format
 	// Should be updated with database on every sync.
@@ -67,9 +67,9 @@ public class CluesData implements Closeable {
 	private static class CluesAdapter extends SimpleCursorAdapter implements Filterable {
 		
 		private static final String[] from = new String[] { 
-			ClueDbAdapter.KEY_CLUEID,
-			ClueDbAdapter.KEY_ANS,
-			ClueDbAdapter.KEY_POINTS
+			Constants.KEY_CLUEID,
+			Constants.KEY_ANS,
+			Constants.KEY_POINTS
 		};
 		private static final int[] to = new int[] { 
 			R.id.cluenum, R.id.answer, R.id.points
@@ -276,34 +276,39 @@ public class CluesData implements Closeable {
 			setTimeToNow();
 		} catch(Exception e) {
 			e.printStackTrace();
-			mIsLoaded = false;
+			//mIsLoaded = false;
 			return false;
 		}
-		
-		mIsLoaded = true;
+		//mIsLoaded = true;
 		return true;
-		
-		//setTimeToNow(); // when sync is done, update last updated time
 	}
 	
 	/**
 	 * Called by Sync if firstTimeSync has already occurred
 	 * @author eric
 	 */
-	private void updateSync() {
-		throw new UnsupportedOperationException();
-		//setTimeToNow(); // when sync is done, update last updated time
+	private void updateSync(String hash) {
+		//throw new UnsupportedOperationException();
+		firstTimeSync(hash);
+		setTimeToNow();
 	}
 	
 	/**
 	 * Syncs to server.  Calls appropriate sync method.
 	 */
 	public void sync(String hash) {
-		//throw new UnsupportedOperationException();
-		// if time > 24 hours old or empty  
-		firstTimeSync(hash);
-		// else
-		// updateSync();
+		// if time > 24 hours old
+		Time now = new Time();
+		now.setToNow();
+		long diff = now.toMillis(false) - lastUpdateTime.toMillis(false);
+		long seconds = diff / 1000;
+		long minutes = seconds / 60;
+		long hours = minutes / 60;
+		if(hours > 24) {
+			firstTimeSync(hash);
+		} else {
+			updateSync(hash);
+		}
 	}
 	
 	/**
@@ -343,9 +348,9 @@ public class CluesData implements Closeable {
 	 */
 	public Cursor filterClues(Boolean solved) throws SQLException {
 		if(solved) {
-			String filter = mDbHelper.KEY_SOLVED + " != 'unsolved'";
+			//String filter = Constants.KEY_SOLVED + " != 'unsolved'";
 		} else {
-			String filter = mDbHelper.KEY_SOLVED + " = 'unsolved'";
+			//String filter = Constants.KEY_SOLVED + " = 'unsolved'";
 		}
 		throw new UnsupportedOperationException();
 	}
@@ -380,21 +385,6 @@ public class CluesData implements Closeable {
 		private static final String TIME_TABLE = "timeTable";
 		private static final Integer DB_VERSION = 1;
 
-		// Define column names for the SQLite Clue DB
-		public static final String KEY_CLUEID = "clueid";
-		public static final String KEY_TEXT = "cluetext";
-		public static final String KEY_ANS = "ans";
-		public static final String KEY_SOLVED = "solved"; // String
-		public static final String KEY_POINTS = "points";
-		public static final String KEY_PHOTO_PATH = "photo_path";
-		public static final String KEY_LOCATION_X = "locationX";
-		public static final String KEY_LOCATION_Y = "locationY";
-		public static final String KEY_UPLOADED = "uploaded"; //boolean
-		public static final String KEY_ROWID = "_id";
-		
-		// Define column names for the SQLite Time DB
-		public static final String TIME_TIME = "time";
-
 		// photo path is a URI, but saved as a String
 		// use Uri.parse(s) and myUri.toString()
 		
@@ -419,25 +409,25 @@ public class CluesData implements Closeable {
 			sb.append("create table ");
 			sb.append(CLUE_TABLE);
 			sb.append(" (");
-			sb.append(KEY_ROWID);
+			sb.append(Constants.KEY_ROWID);
 			sb.append(" integer primary key autoincrement, ");
-			sb.append(KEY_CLUEID);
+			sb.append(Constants.KEY_CLUEID);
 			sb.append(" text not null, ");
-			sb.append(KEY_ANS);
+			sb.append(Constants.KEY_ANS);
 			sb.append(" text not null, ");
-			sb.append(KEY_TEXT);
+			sb.append(Constants.KEY_TEXT);
 			sb.append(" text not null, ");
-			sb.append(KEY_POINTS);
+			sb.append(Constants.KEY_POINTS);
 			sb.append(" integer not null, ");
-			sb.append(KEY_LOCATION_X);
+			sb.append(Constants.KEY_LOCATION_X);
 			sb.append(" integer not null, ");
-			sb.append(KEY_LOCATION_Y);
+			sb.append(Constants.KEY_LOCATION_Y);
 			sb.append(" integer not null, ");
-			sb.append(KEY_SOLVED);
+			sb.append(Constants.KEY_SOLVED);
 			sb.append(" text not null, ");
-			sb.append(KEY_PHOTO_PATH);
+			sb.append(Constants.KEY_PHOTO_PATH);
 			sb.append(" text, ");
-			sb.append(KEY_UPLOADED);
+			sb.append(Constants.KEY_UPLOADED);
 			sb.append(" integer not null);");
 			return sb.toString();
 		}
@@ -446,7 +436,7 @@ public class CluesData implements Closeable {
 			StringBuilder sb = new StringBuilder("create table ");
 			sb.append(TIME_TABLE);
 			sb.append(" (");
-			sb.append(TIME_TIME);
+			sb.append(Constants.TIME_TIME);
 			sb.append(" integer primary key);");
 			return sb.toString();
 		}
@@ -551,15 +541,15 @@ public class CluesData implements Closeable {
 				Integer points, Double[] location, String solved,
 				String photo_path, Boolean uploaded) {
 			ContentValues cv = new ContentValues();
-			cv.put(KEY_CLUEID, clueId);
-			cv.put(KEY_ANS, answer);
-			cv.put(KEY_TEXT, originalClue);
-			cv.put(KEY_POINTS, points);
-			cv.put(KEY_LOCATION_X, location[0]);
-			cv.put(KEY_LOCATION_Y, location[1]);
-			cv.put(KEY_SOLVED, solved);
-			cv.put(KEY_PHOTO_PATH, photo_path);
-			cv.put(KEY_UPLOADED, uploaded);
+			cv.put(Constants.KEY_CLUEID, clueId);
+			cv.put(Constants.KEY_ANS, answer);
+			cv.put(Constants.KEY_TEXT, originalClue);
+			cv.put(Constants.KEY_POINTS, points);
+			cv.put(Constants.KEY_LOCATION_X, location[0]);
+			cv.put(Constants.KEY_LOCATION_Y, location[1]);
+			cv.put(Constants.KEY_SOLVED, solved);
+			cv.put(Constants.KEY_PHOTO_PATH, photo_path);
+			cv.put(Constants.KEY_UPLOADED, uploaded);
 
 			return mDb.insert(CLUE_TABLE, null, cv);
 		}
@@ -583,7 +573,7 @@ public class CluesData implements Closeable {
 		 * @return true if successful, false otherwise
 		 */
 		public boolean deleteClue(long rowID) {
-			return mDb.delete(CLUE_TABLE, KEY_ROWID + "=" + rowID, null) > 0;
+			return mDb.delete(CLUE_TABLE, Constants.KEY_ROWID + "=" + rowID, null) > 0;
 		}
 
 		/**
@@ -592,7 +582,7 @@ public class CluesData implements Closeable {
 		 * @return true if successful, false otherwise
 		 */
 		public boolean deleteClue(String clueId) {
-			return mDb.delete(CLUE_TABLE, KEY_CLUEID + "=" + clueId, null) > 0;
+			return mDb.delete(CLUE_TABLE, Constants.KEY_CLUEID + "=" + clueId, null) > 0;
 		}
 
 		/**
@@ -618,16 +608,16 @@ public class CluesData implements Closeable {
 				Integer points, Double[] location, String solved,
 				String photo_path, Boolean uploaded) {
 			ContentValues cv = new ContentValues();
-			cv.put(KEY_ANS, answer);
-			cv.put(KEY_TEXT, originalClue);
-			cv.put(KEY_POINTS, points);
-			cv.put(KEY_LOCATION_X, location[0]);
-			cv.put(KEY_LOCATION_Y, location[1]);
-			cv.put(KEY_SOLVED, solved);
-			cv.put(KEY_PHOTO_PATH, photo_path);
-			cv.put(KEY_UPLOADED, uploaded);
+			cv.put(Constants.KEY_ANS, answer);
+			cv.put(Constants.KEY_TEXT, originalClue);
+			cv.put(Constants.KEY_POINTS, points);
+			cv.put(Constants.KEY_LOCATION_X, location[0]);
+			cv.put(Constants.KEY_LOCATION_Y, location[1]);
+			cv.put(Constants.KEY_SOLVED, solved);
+			cv.put(Constants.KEY_PHOTO_PATH, photo_path);
+			cv.put(Constants.KEY_UPLOADED, uploaded);
 
-			return mDb.update(CLUE_TABLE, cv, KEY_CLUEID + "=" + clueId, null) > 0;
+			return mDb.update(CLUE_TABLE, cv, Constants.KEY_CLUEID + "=" + clueId, null) > 0;
 		}
 
 		/**
@@ -636,9 +626,11 @@ public class CluesData implements Closeable {
 		 */
 		public Cursor fetchAllClues() {
 			return mDb.query(CLUE_TABLE,
-					new String[] { KEY_ROWID, KEY_CLUEID, KEY_ANS, KEY_TEXT,
-					KEY_POINTS, KEY_LOCATION_X, KEY_LOCATION_Y, KEY_SOLVED, KEY_PHOTO_PATH, 
-					KEY_UPLOADED },
+					new String[] { Constants.KEY_ROWID, 
+						Constants.KEY_CLUEID, Constants.KEY_ANS, Constants.KEY_TEXT,
+						Constants.KEY_POINTS, Constants.KEY_LOCATION_X, 
+						Constants.KEY_LOCATION_Y, Constants.KEY_SOLVED, 
+						Constants.KEY_PHOTO_PATH, Constants.KEY_UPLOADED },
 					null, null, null, null, null);
 		}
 
@@ -650,10 +642,12 @@ public class CluesData implements Closeable {
 		 */
 		public Cursor fetchClue(long rowId) throws SQLException {
 			Cursor mCursor = mDb.query(true, CLUE_TABLE,
-					new String[] { KEY_ROWID, KEY_CLUEID, KEY_ANS, KEY_TEXT,
-					KEY_POINTS, KEY_LOCATION_X, KEY_LOCATION_Y, KEY_SOLVED, KEY_PHOTO_PATH, 
-					KEY_UPLOADED },
-					KEY_ROWID + "=" + rowId, null, null, null, null, null);
+					new String[] { Constants.KEY_ROWID, 
+						Constants.KEY_CLUEID, Constants.KEY_ANS, Constants.KEY_TEXT,
+						Constants.KEY_POINTS, Constants.KEY_LOCATION_X, 
+						Constants.KEY_LOCATION_Y, Constants.KEY_SOLVED, 
+						Constants.KEY_PHOTO_PATH, Constants.KEY_UPLOADED },
+					Constants.KEY_ROWID + "=" + rowId, null, null, null, null, null);
 			if (mCursor != null)
 				mCursor.moveToFirst();
 			return mCursor;
@@ -667,23 +661,28 @@ public class CluesData implements Closeable {
 		 */
 		public Cursor filterClues(String clueId) throws SQLException {
 			Cursor mCursor = mDb.query(true, CLUE_TABLE,
-					new String[] { KEY_ROWID, KEY_CLUEID, KEY_ANS, KEY_TEXT,
-					KEY_POINTS, KEY_LOCATION_X, KEY_LOCATION_Y, KEY_SOLVED, KEY_PHOTO_PATH, 
-					KEY_UPLOADED },
-					KEY_CLUEID + " LIKE \"" + clueId + "%\"", null, null, null, null, null);
+					new String[] { Constants.KEY_ROWID, 
+						Constants.KEY_CLUEID, Constants.KEY_ANS, Constants.KEY_TEXT,
+						Constants.KEY_POINTS, Constants.KEY_LOCATION_X, 
+						Constants.KEY_LOCATION_Y, Constants.KEY_SOLVED, 
+						Constants.KEY_PHOTO_PATH, Constants.KEY_UPLOADED },
+					Constants.KEY_CLUEID + " LIKE \"" + clueId + "%\"", null, null, null, null, null);
 			return mCursor;
 		}
 		
 		public void setTime(long t) {
 			ContentValues cv = new ContentValues();
-			cv.put(TIME_TIME, t);
+			cv.put(Constants.TIME_TIME, t);
 			mDb.update(TIME_TABLE, cv, null, null);
 		}
 		
 		public long getTime() {
 			Cursor c = mDb.rawQuery("SELECT * FROM " + TIME_TABLE, null);
+			if(c.getCount() < 1) {
+				return -1;
+			}
 			c.moveToFirst();
-			int t = c.getInt(c.getColumnIndex(TIME_TIME));
+			long t = c.getLong(c.getColumnIndex(Constants.TIME_TIME));
 			c.close();
 			return t;
 		}

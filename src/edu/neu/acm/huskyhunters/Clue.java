@@ -1,11 +1,8 @@
 package edu.neu.acm.huskyhunters;
 
-import java.util.HashMap;
-
 import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 public class Clue implements Parcelable {
 

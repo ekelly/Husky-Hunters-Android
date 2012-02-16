@@ -18,7 +18,7 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
 public class HuntersActivity extends ListActivity {
-	private static final String TAG = "HuntersActivityDb";
+	//private static final String TAG = "HuntersActivityDb";
 	
 	CluesData clues;
 	SimpleCursorAdapter cluesAdapter;
@@ -96,7 +96,7 @@ public class HuntersActivity extends ListActivity {
 		    	if (resultCode == RESULT_OK) {
 		    		Bundle res = data.getExtras();
 		    		Boolean picTaken = res.getBoolean("PictureTaken");
-		    		Integer index = res.getInt("cluenum");
+		    		//Integer index = res.getInt("cluenum");
 		    		if(picTaken) {
 		    			// Sets clue to boolean and returns itself
 		    			// clues.get(index).setSolved(picTaken);
@@ -115,7 +115,7 @@ public class HuntersActivity extends ListActivity {
 	        	if (resultCode == RESULT_OK) {
 		    		Bundle res = data.getExtras();
 		    		Boolean solved = res.getBoolean("solved");
-		    		Integer cluenum = res.getInt("cluenum");
+		    		//Integer cluenum = res.getInt("cluenum");
 		    		if(solved) {
 		    			// Sets clue to boolean and returns itself
 		    			/*
