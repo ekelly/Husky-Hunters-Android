@@ -25,6 +25,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.graphics.Color;
 import android.text.format.Time;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -102,11 +103,11 @@ public class CluesData implements Closeable {
 	        final LayoutInflater inflater = LayoutInflater.from(context);
 	        View v = inflater.inflate(layout, parent, false);
 	        String solved = cursor.getString(cursor.getColumnIndex(Constants.KEY_SOLVED));
-	        /*
-	        if(solved == "solved") {
-	        	v.setBackgroundColor(R.color.green);
+	        if(solved != "solved") {
+	        	v.setBackgroundResource(R.drawable.list_item_solved);
+	        	v.invalidate();
 	        }
-	        */
+	        
 	        return v;
 		}
 		
