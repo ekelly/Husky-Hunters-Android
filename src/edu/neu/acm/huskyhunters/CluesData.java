@@ -101,18 +101,25 @@ public class CluesData implements Closeable {
 		public View newView(Context context, Cursor cursor, ViewGroup parent) {
 	        final LayoutInflater inflater = LayoutInflater.from(context);
 	        View v = inflater.inflate(layout, parent, false);
-	        String solved = cursor.getString(cursor.getColumnIndex("solved"));
+	        String solved = cursor.getString(cursor.getColumnIndex(Constants.KEY_SOLVED));
+	        /*
 	        if(solved == "solved") {
 	        	v.setBackgroundColor(R.color.green);
 	        }
+	        */
 	        return v;
 		}
 		
 		@Override
 		public Cursor runQueryOnBackgroundThread(CharSequence constraint) {
 			String filter = (String) constraint;
-	        return getInstance(context).filterClues(filter);
-		}		
+	        Cursor c = getInstance(context).filterClues(filter);
+	        Cursor oldCursor = getCursor();
+	        if(oldCursor != null) {
+	        	oldCursor.close();
+	        }
+	        return c;
+		}
 	}
 	
 	public CluesData(Context ctx) {

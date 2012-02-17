@@ -1,5 +1,7 @@
 package edu.neu.acm.huskyhunters;
 
+import edu.neu.acm.huskyhunters.Constants;
+
 import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -72,13 +74,13 @@ public class Clue implements Parcelable {
 	
 	Clue(Cursor c) {
 		c.moveToFirst();
-		this.clueNum  = c.getString(c.getColumnIndex("clueid"));
-		this.answer   = c.getString(c.getColumnIndex("ans"));
-		this.clue     = c.getString(c.getColumnIndex("cluetext"));
-		this.points   = c.getInt(c.getColumnIndex("points"));
+		this.clueNum  = c.getString(c.getColumnIndex(Constants.KEY_CLUEID));
+		this.answer   = c.getString(c.getColumnIndex(Constants.KEY_ANS));
+		this.clue     = c.getString(c.getColumnIndex(Constants.KEY_TEXT));
+		this.points   = c.getInt(c.getColumnIndex(Constants.KEY_POINTS));
 		this.location = "";
-		this.solved   = c.getString(c.getColumnIndex("solved"));
-		this.photo    = c.getString(c.getColumnIndex("photo_path"));
+		this.solved   = c.getString(c.getColumnIndex(Constants.KEY_SOLVED));
+		this.photo    = c.getString(c.getColumnIndex(Constants.KEY_PHOTO_PATH));
 	}
 	
 	@Override

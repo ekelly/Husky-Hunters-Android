@@ -11,14 +11,17 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Filter;
+import android.widget.FilterQueryProvider;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
 public class HuntersActivity extends ListActivity {
-	//private static final String TAG = "HuntersActivityDb";
+	private static final String TAG = "HuntersActivityDb";
 	
 	CluesData clues;
 	SimpleCursorAdapter cluesAdapter;
@@ -75,7 +78,15 @@ public class HuntersActivity extends ListActivity {
                 int after) {}
         public void onTextChanged(CharSequence s, int start, int before,
                 int count) {
-            cluesAdapter.getFilter().filter(s);
+            cluesAdapter.getFilter().filter(s, new Filter.FilterListener() {
+				
+				@Override
+				public void onFilterComplete(int count) {
+					//HuntersActivity.this.findViewById(android.R.id.list).invalidate();
+					HuntersActivity.this.setListAdapter(cluesAdapter);
+				}
+			});
+            Log.d(TAG, "test");
         }
     };
     
