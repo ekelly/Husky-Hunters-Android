@@ -95,7 +95,7 @@ public class HuntersActivity extends ListActivity {
 		String clueid = item.getString(item.getColumnIndex("clueid"));
 		Intent intent = new Intent(this, ClueDetailActivity.class);
 		Bundle bundle = new Bundle();
-		bundle.putInt("cluenum", Integer.parseInt(clueid));
+		bundle.putString("clueid", clueid);
 		intent.putExtras(bundle);
 		startActivityForResult(intent, R.integer.clue_result);
 	}

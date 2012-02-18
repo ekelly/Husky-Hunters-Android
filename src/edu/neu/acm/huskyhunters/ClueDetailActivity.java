@@ -30,11 +30,13 @@ public class ClueDetailActivity extends Activity {
 		
 		Intent intent = getIntent();
 		Bundle data = intent.getExtras();
-		Integer cluenum = data.getInt("cluenum");
+		String clueid = data.getString("clueid");
 		clues = CluesData.getInstance(getApplicationContext());
-		Cursor clueCursor = clues.filterClues(cluenum.toString());
+		Cursor clueCursor = clues.filterClues(clueid);
 		startManagingCursor(clueCursor);
-		clue = new Clue(clueCursor);
+		Cursor cluePhotos = clues.fetchCluePhotos(clueid);
+		startManagingCursor(cluePhotos);
+		clue = new Clue(clueCursor, cluePhotos);
 		
 		// Set content in the view
 		View status = findViewById(R.id.detail_status);

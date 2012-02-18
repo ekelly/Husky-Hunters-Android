@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -103,7 +105,7 @@ public class CluesData implements Closeable {
 	        final LayoutInflater inflater = LayoutInflater.from(context);
 	        View v = inflater.inflate(layout, parent, false);
 	        String solved = cursor.getString(cursor.getColumnIndex(Constants.KEY_SOLVED));
-	        if(solved != "solved") {
+	        if(solved == "solved") {
 	        	v.setBackgroundResource(R.drawable.list_item_solved);
 	        	v.invalidate();
 	        }
@@ -113,6 +115,9 @@ public class CluesData implements Closeable {
 		
 		@Override
 		public Cursor runQueryOnBackgroundThread(CharSequence constraint) {
+			if(constraint == null || constraint.equals("")) {
+				return getInstance(context).fetchAllClues();
+			}
 			String filter = (String) constraint;
 	        Cursor c = getInstance(context).filterClues(filter);
 	        Cursor oldCursor = getCursor();
@@ -177,8 +182,9 @@ public class CluesData implements Closeable {
 	}
 	
 	/**
-	 * Parse JSON representation of clues and add it to the database
+	 * Parse JSON representation of clues and return an ArrayList of clues
 	 * @param data JSON representation of the clues
+	 * @return ArrayList<Clue>
 	 * @author eric
 	 */
 	private ArrayList<Clue> parseClues(String data) {
@@ -207,7 +213,7 @@ public class CluesData implements Closeable {
 				String solved = "unsolved";
 				
 				clueList.add(new Clue(clueid, answer, originalClue, 
-						points, "", solved, latlng, null));
+						points, "", solved, latlng, new LinkedList<String>()));
 				
 				Log.i(TAG, originalClue);
 			}
@@ -337,6 +343,10 @@ public class CluesData implements Closeable {
 		return mDbHelper.fetchClue(rowId);
 	}
 	
+	public Cursor fetchCluePhotos(String clueid) {
+		return mDbHelper.fetchCluePhotos(clueid);
+	}
+	
 	/**
 	 * Returns a Cursor of all clues whose Clue ID begins with the given String
 	 * @param clueId Clue ID to pattern match clues to retrieve
@@ -386,11 +396,11 @@ public class CluesData implements Closeable {
 	public static class ClueDbAdapter implements Closeable {
 		// Debugging TAG
 		public static final String TAG = "ClueDbHelper";
-		
 
 		private static final String DB_NAME = "cluedata";
 		private static final String CLUE_TABLE = "clueTable";
 		private static final String TIME_TABLE = "timeTable";
+		private static final String PHOTO_TABLE = "photoTable";
 		private static final Integer DB_VERSION = 1;
 
 		// photo path is a URI, but saved as a String
@@ -409,6 +419,7 @@ public class CluesData implements Closeable {
 
 		private static final String CLUEDB_CREATE = makeClueDatabaseCreator();
 		private static final String TIMEDB_CREATE = makeTimeDatabaseCreator();
+		private static final String PHOTODB_CREATE = makePhotoDatabaseCreator();
 		private static final String SET_TIME_ZERO = 
 				"INSERT INTO " + TIME_TABLE + " VALUES(0);";
 
@@ -448,6 +459,17 @@ public class CluesData implements Closeable {
 			sb.append(" integer primary key);");
 			return sb.toString();
 		}
+		
+		private static final String makePhotoDatabaseCreator() {
+			StringBuilder sb = new StringBuilder("create table ");
+			sb.append(PHOTO_TABLE);
+			sb.append(" (");
+			sb.append(Constants.KEY_CLUEID);
+			sb.append(" text primary key not null, ");
+			sb.append(Constants.KEY_PHOTO_PATH);
+			sb.append(" text);");
+			return sb.toString();
+		}
 
 		private final Context mCtx;
 
@@ -477,6 +499,7 @@ public class CluesData implements Closeable {
 			public void onCreate(SQLiteDatabase db) {
 				db.execSQL(CLUEDB_CREATE);
 				db.execSQL(TIMEDB_CREATE);
+				db.execSQL(PHOTODB_CREATE);
 				db.execSQL(SET_TIME_ZERO);
 			}
 
@@ -501,6 +524,7 @@ public class CluesData implements Closeable {
 			public void clear(SQLiteDatabase db) {
 				db.execSQL("DROP TABLE IF EXISTS " + CLUE_TABLE);
 				db.execSQL("DROP TABLE IF EXISTS " + TIME_TABLE);
+				db.execSQL("DROP TABLE IF EXISTS " + PHOTO_TABLE);
 				onCreate(db);
 			}
 
@@ -547,7 +571,7 @@ public class CluesData implements Closeable {
 		 */
 		public long insertClue(String clueId, String answer, String originalClue,
 				Integer points, Double[] location, String solved,
-				String photo_path, Boolean uploaded) {
+				List<String> photos, Boolean uploaded) {
 			ContentValues cv = new ContentValues();
 			cv.put(Constants.KEY_CLUEID, clueId);
 			cv.put(Constants.KEY_ANS, answer);
@@ -556,9 +580,14 @@ public class CluesData implements Closeable {
 			cv.put(Constants.KEY_LOCATION_X, location[0]);
 			cv.put(Constants.KEY_LOCATION_Y, location[1]);
 			cv.put(Constants.KEY_SOLVED, solved);
-			cv.put(Constants.KEY_PHOTO_PATH, photo_path);
 			cv.put(Constants.KEY_UPLOADED, uploaded);
+			
+			ContentValues pics = new ContentValues();
+			for(String photo : photos) {
+				pics.put(clueId, photo);
+			}
 
+			mDb.insert(PHOTO_TABLE, null, pics);
 			return mDb.insert(CLUE_TABLE, null, cv);
 		}
 		
@@ -569,10 +598,10 @@ public class CluesData implements Closeable {
 			Integer points = clue.points();
 			Double[] latlng = clue.latlng();
 			String solved = clue.solved();
-			String photo_path = clue.photo();
+			List<String> photos = clue.photo();
 			Boolean uploaded = false;
 			return this.insertClue(clueId, answer, originalClue, points, 
-					latlng, solved, photo_path, uploaded);
+					latlng, solved, photos, uploaded);
 		}
 
 		/**
@@ -660,10 +689,11 @@ public class CluesData implements Closeable {
 				mCursor.moveToFirst();
 			return mCursor;
 		}
-
+		
 		/**
-		 * Returns a Cursor of all clues that match the given ClueID string.
+		 * Returns a Cursor of all clues that match the given ClueID string in the given table.
 		 * @param clueId id to pattern match clues to retrieve
+		 * @param table table to filter from
 		 * @return Cursor of all clues that match the given expression
 		 * @throws SQLException if clue could not be found/retrieved
 		 */
@@ -674,6 +704,19 @@ public class CluesData implements Closeable {
 						Constants.KEY_POINTS, Constants.KEY_LOCATION_X, 
 						Constants.KEY_LOCATION_Y, Constants.KEY_SOLVED, 
 						Constants.KEY_PHOTO_PATH, Constants.KEY_UPLOADED },
+					Constants.KEY_CLUEID + " LIKE \"" + clueId + "%\"", null, null, null, null, null);
+			return mCursor;
+		}
+		
+		/**
+		 * Returns Cursor of all photos associated with the given ClueID string
+		 * @param String clueId
+		 * @return Cursor of all clues that match the given expression
+		 * @throws SQLException if clue could not be found/retrieved
+		 */
+		public Cursor fetchCluePhotos(String clueId) throws SQLException {
+			Cursor mCursor = mDb.query(true, PHOTO_TABLE,
+					new String[] { Constants.KEY_CLUEID, Constants.KEY_PHOTO_PATH },
 					Constants.KEY_CLUEID + " LIKE \"" + clueId + "%\"", null, null, null, null, null);
 			return mCursor;
 		}
