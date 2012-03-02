@@ -1,38 +1,47 @@
-package edu.neu.acm.huskyhunters;
+package net.erickelly.huskyhunters;
 
-import edu.neu.acm.huskyhunters.R;
-import android.app.ListActivity;
-import android.app.ProgressDialog;
+import net.erickelly.huskyhunters.data.CluesData;
+import net.erickelly.huskyhunters.services.DownloaderService;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
+import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteCursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.Filter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
-public class HuntersActivity extends ListActivity {
+public class HuntersActivity extends FragmentActivity {
 	private static final String TAG = "HuntersActivityDb";
+	private final int CLUE_RESULT = 1;
+	private final int CAMERA_RESULT = 0;
 	
 	CluesData clues;
 	SimpleCursorAdapter cluesAdapter;
 	Context context = this;
 	EditText filterText = null;
+	ListView list = null;
+	TextView empty = null;
 	
-	private static final String GROUP_HASH = "1480092";
+	private static String GROUP_HASH; // = "1480092";
 	
-	class DownloadCluesTask extends AsyncTask<String, Integer, CluesData>{
+	class DownloadCluesTask extends AsyncTask<String, Integer, CluesData> {
 		
-		ProgressDialog loading;
-
 		@Override
 		protected CluesData doInBackground(String... params) {
 			String groupHash = params[0];
@@ -41,19 +50,16 @@ public class HuntersActivity extends ListActivity {
 		}
 		
 		@Override
-		protected void onPreExecute() {
-			loading = new ProgressDialog(context);
-			loading.setMessage("Downloading clues");
-			loading.show();
-		}
-		
-		@Override
 		protected void onPostExecute(CluesData result) {
 			clues = result;
-			// Update the list
-			setListAdapter(clues.getAdapter());
-			if(loading.isShowing()) {
-				loading.dismiss();
+			if (clues.fetchAllClues().getCount() < 1) {
+				list.setVisibility(2);
+				empty.setVisibility(0);
+			} else {
+				// Update the list
+				list.setVisibility(0);
+				empty.setVisibility(2);
+				list.setAdapter(clues.getAdapter());
 			}
 		}
 	}
@@ -62,14 +68,61 @@ public class HuntersActivity extends ListActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        GROUP_HASH = sp.getString("groupid", "42612523"); // TODO: make null when in production
         clues = CluesData.getInstance(this);
+        
+        setContentView(R.layout.clue_list);
+        list = (ListView) findViewById(R.id.clue_list);
+        filterText = (EditText) findViewById(R.id.search_box);
+        empty = (TextView) findViewById(R.id.empty);
+        
         fillData();
         new DownloadCluesTask().execute(GROUP_HASH);
-        setContentView(R.layout.clue_list);
-        this.getListView().setTextFilterEnabled(true);
-        filterText = (EditText) findViewById(R.id.search_box);
+        
+        list.setTextFilterEnabled(true);
+        list.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				SQLiteCursor item = (SQLiteCursor) list.getAdapter().getItem(position);
+				String clueid = item.getString(item.getColumnIndex("clueid"));
+				Intent intent = new Intent(HuntersActivity.this, ClueDetailActivity.class);
+				Bundle bundle = new Bundle();
+				bundle.putString("clueid", clueid);
+				intent.putExtras(bundle);
+				startActivityForResult(intent, CLUE_RESULT);
+			}
+        });
         filterText.addTextChangedListener(filterTextWatcher);
     }
+    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+    	Intent intent = new Intent(HuntersActivity.this.getApplicationContext(),
+                DownloaderService.class);
+    	intent.putExtra("grouphash", GROUP_HASH);
+    	MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+        MenuItem refresh = menu.findItem(R.id.refresh);
+        refresh.setIntent(intent);
+        return true;
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+    	switch(item.getItemId()) {
+			case R.id.refresh:
+				startService(item.getIntent());
+				return true;
+			case R.id.settings:
+				startActivity(new Intent(this, Settings.class));
+				return true;
+    	}
+    	return false;
+    }
+    
+    
     
     private TextWatcher filterTextWatcher = new TextWatcher() {
         public void afterTextChanged(Editable s) {}
@@ -82,27 +135,16 @@ public class HuntersActivity extends ListActivity {
 				@Override
 				public void onFilterComplete(int count) {
 					//HuntersActivity.this.findViewById(android.R.id.list).invalidate();
-					HuntersActivity.this.setListAdapter(cluesAdapter);
+					list.setAdapter(cluesAdapter);
 				}
 			});
             Log.d(TAG, "test");
         }
     };
     
-    @Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
-		SQLiteCursor item = (SQLiteCursor) getListAdapter().getItem(position);
-		String clueid = item.getString(item.getColumnIndex("clueid"));
-		Intent intent = new Intent(this, ClueDetailActivity.class);
-		Bundle bundle = new Bundle();
-		bundle.putString("clueid", clueid);
-		intent.putExtras(bundle);
-		startActivityForResult(intent, R.integer.clue_result);
-	}
-    
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 	     switch(requestCode) {
-	     	case R.integer.camera_result:
+	     	case CAMERA_RESULT:
 		    	if (resultCode == RESULT_OK) {
 		    		Bundle res = data.getExtras();
 		    		Boolean picTaken = res.getBoolean("PictureTaken");
@@ -121,7 +163,7 @@ public class HuntersActivity extends ListActivity {
 		    	}
 		    	Toast.makeText(this, "Picture not taken.", Toast.LENGTH_SHORT).show();
 	        	break;
-	        case R.integer.clue_result:
+	        case CLUE_RESULT:
 	        	if (resultCode == RESULT_OK) {
 		    		Bundle res = data.getExtras();
 		    		Boolean solved = res.getBoolean("solved");
@@ -139,8 +181,6 @@ public class HuntersActivity extends ListActivity {
 		    			}
 		    			*/
 		    			// Reset the list
-		    	        setListAdapter(CluesData.getInstance(this
-		    	        		.getApplicationContext()).getAdapter());
 		    			
 		    			// TODO Send data to server
 		    			
@@ -157,10 +197,7 @@ public class HuntersActivity extends ListActivity {
      * Gets all the clues from the database and populates the item list.
      */
     private void fillData() {
-		Cursor c = clues.fetchAllClues();
-		startManagingCursor(c);
-		cluesAdapter = clues.getAdapter();
-		setListAdapter(cluesAdapter);
+		list.setAdapter(clues.getAdapter());
 	}
     
     @Override

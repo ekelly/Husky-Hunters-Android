@@ -1,10 +1,10 @@
-package edu.neu.acm.huskyhunters;
+package net.erickelly.huskyhunters.data;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import edu.neu.acm.huskyhunters.Constants;
+import net.erickelly.huskyhunters.data.Constants;
+
 
 import android.database.Cursor;
 import android.os.Parcel;
@@ -78,7 +78,7 @@ public class Clue implements Parcelable {
 		in.readStringList(this.photo);
 	}
 	
-	Clue(Cursor c, Cursor photos) {
+	public Clue(Cursor c, Cursor photos) {
 		c.moveToFirst();
 		this.clueNum  = c.getString(c.getColumnIndex(Constants.KEY_CLUEID));
 		this.answer   = c.getString(c.getColumnIndex(Constants.KEY_ANS));

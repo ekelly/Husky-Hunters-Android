@@ -1,4 +1,4 @@
-package edu.neu.acm.huskyhunters;
+package net.erickelly.huskyhunters.data;
 
 public final class Constants {
 	

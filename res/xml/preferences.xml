@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" 
+    android:title="Settings">
+    
+    <EditTextPreference android:title="@string/groupid"
+        android:inputType="text" android:summary="Set the group id here"
+        android:key="groupid" android:persistent="true"></EditTextPreference>
+    
+    <CheckBoxPreference android:title="@string/wifi_only"
+        android:summary="Upload only on wifi?"
+        android:key="wifi_only" android:persistent="true"></CheckBoxPreference>
+    
+</PreferenceScreen>

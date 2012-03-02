@@ -1,22 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="edu.neu.acm.huskyhunters"
+    package="net.erickelly.huskyhunters"
     android:versionCode="1"
     android:versionName="1.0" >
 
-    <uses-sdk android:minSdkVersion="8" />
+    <uses-sdk android:minSdkVersion="8"
+        	  android:targetSdkVersion="10" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <application android:icon="@drawable/ic_launcher" android:label="@string/app_name">
         <activity android:label="@string/app_name" android:name=".HuntersActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity android:name=".ClueDetailActivity"></activity>
-        
+        <activity android:name=".Settings"></activity>
+        <service android:name=".services.DownloaderService"></service>
     </application>
 
 </manifest>

@@ -4,5 +4,7 @@
     <string name="hello">Hello World, HuntersActivity!</string>
     <string name="app_name">Husky-Hunters-Android</string>
     <string name="nocontent">No clues or could not connect to the server</string>
+    <string name="groupid">Group Code</string>
+    <string name="wifi_only">Wifi-Only</string>
 
 </resources>

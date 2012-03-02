@@ -1,6 +1,9 @@
-package edu.neu.acm.huskyhunters;
+package net.erickelly.huskyhunters;
 
 import java.io.File;
+
+import net.erickelly.huskyhunters.data.Clue;
+import net.erickelly.huskyhunters.data.CluesData;
 
 import android.app.Activity;
 import android.content.ContentValues;
@@ -10,13 +13,14 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class ClueDetailActivity extends Activity {
+public class ClueDetailActivity extends FragmentActivity {
 	
 	Clue clue;
 	boolean solved;
