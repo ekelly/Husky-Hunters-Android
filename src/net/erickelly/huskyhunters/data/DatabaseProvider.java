@@ -55,7 +55,7 @@ public class DatabaseProvider implements Closeable {
 
 	// CONTENT PROVIDER FINALS
 	private static final String AUTHORITY = "net.erickelly.huskyhunters";
-	private static final String CLUES_BASE_PATH = "tutorials";
+	private static final String CLUES_BASE_PATH = "";
 	private static final int CLUES = 1;
 	private static final int CLUE_ID = 2;
 	public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY
@@ -322,7 +322,7 @@ public class DatabaseProvider implements Closeable {
 
 	/**
 	 * Returns a Cursor positioned at the clue that matches the given rowId
-	 * @param rowId id of clue to retrieve
+	 * @param rowId row of clue to retrieve
 	 * @return Cursor positioned at the matching clue, if found
 	 * @throws SQLException if clue could not be found/retrieved
 	 */
@@ -334,6 +334,25 @@ public class DatabaseProvider implements Closeable {
 					Constants.KEY_LOCATION_Y, Constants.KEY_SOLVED, 
 					Constants.KEY_PHOTO_PATH, Constants.KEY_UPLOADED },
 				Constants.KEY_ROWID + "=" + rowId, null, null, null, null, null);
+		if (mCursor != null)
+			mCursor.moveToFirst();
+		return mCursor;
+	}
+	
+	/**
+	 * Returns a Cursor positioned at the clue that matches the given rowId
+	 * @param clueid id of clue to retrieve
+	 * @return Cursor positioned at the matching clue, if found
+	 * @throws SQLException if clue could not be found/retrieved
+	 */
+	public Cursor fetchClue(String clueid) throws SQLException {
+		Cursor mCursor = mDb.query(true, CLUE_TABLE,
+				new String[] { Constants.KEY_ROWID, 
+					Constants.KEY_CLUEID, Constants.KEY_ANS, Constants.KEY_TEXT,
+					Constants.KEY_POINTS, Constants.KEY_LOCATION_X, 
+					Constants.KEY_LOCATION_Y, Constants.KEY_SOLVED, 
+					Constants.KEY_PHOTO_PATH, Constants.KEY_UPLOADED },
+				Constants.KEY_CLUEID + "=" + clueid, null, null, null, null, null);
 		if (mCursor != null)
 			mCursor.moveToFirst();
 		return mCursor;
@@ -386,63 +405,4 @@ public class DatabaseProvider implements Closeable {
 		c.close();
 		return t;
 	}
-
-	/*
-	// CONTENT PROVIDER FUNCTIONS
-	@Override
-	public int delete(Uri uri, String selection, String[] selectionArgs) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public String getType(Uri uri) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Uri insert(Uri uri, ContentValues values) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean onCreate() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public Cursor query(Uri uri, String[] projection, String selection,
-			String[] selectionArgs, String sortOrder) {
-		SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
-	    queryBuilder.setTables(CLUE_TABLE);
-	 
-	    int uriType = sURIMatcher.match(uri);
-	    switch (uriType) {
-	    case CLUE_ID:
-	        queryBuilder.appendWhere(Constants.KEY_CLUEID + "="
-	                + uri.getLastPathSegment());
-	        break;
-	    case CLUES:
-	        // no filter
-	        break;
-	    default:
-	        throw new IllegalArgumentException("Unknown URI");
-	    }
-	 
-	    Cursor cursor = queryBuilder.query(mDbHelper.getReadableDatabase(),
-	            projection, selection, selectionArgs, null, null, sortOrder);
-	    cursor.setNotificationUri(getContext().getContentResolver(), uri);
-	    return cursor;
-	}
-
-	@Override
-	public int update(Uri uri, ContentValues values, String selection,
-			String[] selectionArgs) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-	*/
 }
