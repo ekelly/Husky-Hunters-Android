@@ -54,7 +54,7 @@ public class CluesData implements Closeable {
 	// Should be updated with database on every sync.
 	private Time lastUpdateTime;
 	
-	private DatabaseProvider mDbHelper;
+	private DatabaseWrapper mDbHelper;
 	
 	/**
 	 * A cursor adapter to use with the ListActivity
@@ -126,7 +126,7 @@ public class CluesData implements Closeable {
 	
 	public CluesData(Context ctx) {
 		this.mCtx = ctx;
-		mDbHelper = new DatabaseProvider(mCtx);
+		mDbHelper = new DatabaseWrapper(mCtx);
 		try {
 			mDbHelper.open();
 			lastUpdateTime = new Time();
@@ -197,7 +197,7 @@ public class CluesData implements Closeable {
 				String answer = obj.getString("answer");
 				/*String originalClue = obj.getString("clue");*/
 				String originalClue = obj.getString("hint");
-				int points = obj.getInt("points");
+				Integer points = obj.getInt("points");
 				/*String solved = obj.getString("solved");*/
 				JSONArray ll = obj.getJSONArray("latlng");
 				Double[] latlng = { 0.0, 0.0 };
